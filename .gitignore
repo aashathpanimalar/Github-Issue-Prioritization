@@ -1,0 +1,17 @@
+# React
+frontend/node_modules/
+frontend/build/
+frontend/.env
+
+# Spring Boot
+backend/target/
+backend/.classpath
+backend/.project
+backend/.settings/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
