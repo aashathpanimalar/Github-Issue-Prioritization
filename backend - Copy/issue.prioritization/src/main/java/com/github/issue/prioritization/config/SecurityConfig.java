@@ -28,20 +28,27 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/public-repo/**",
-                                "/api/github/oauth/**"
+                                "/api/github/oauth/**"   // ✅ START + CALLBACK
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
+
+
+
+
+
+                // ✅ ADD JWT FILTER
                 .addFilterBefore(
                         jwtAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
                 );
+
+
 
         return http.build();
     }
