@@ -2,14 +2,19 @@ package com.github.issue.prioritization.ml;
 
 public class TextPreprocessor {
 
-    public static String clean(String text) {
+    public static String preprocess(String text) {
 
         if (text == null) return "";
 
-        return text
-                .toLowerCase()
-                .replaceAll("[^a-z ]", "")
-                .replaceAll("\\s+", " ")
-                .trim();
+        // Lowercase
+        text = text.toLowerCase();
+
+        // Remove special characters
+        text = text.replaceAll("[^a-zA-Z ]", " ");
+
+        // Remove extra spaces
+        text = text.replaceAll("\\s+", " ").trim();
+
+        return text;
     }
 }

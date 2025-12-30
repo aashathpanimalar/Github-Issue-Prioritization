@@ -4,11 +4,20 @@ import java.util.*;
 
 public class TfIdfVectorizer {
 
-    public static double score(String text) {
+    public static Map<String, Double> vectorize(String text) {
 
+        Map<String, Double> tf = new HashMap<>();
         String[] words = text.split(" ");
-        Set<String> uniqueWords = new HashSet<>(Arrays.asList(words));
 
-        return uniqueWords.size(); // simplified TF-IDF weight
+        for (String word : words) {
+            tf.put(word, tf.getOrDefault(word, 0.0) + 1.0);
+        }
+
+        // Normalize
+        for (String word : tf.keySet()) {
+            tf.put(word, tf.get(word) / words.length);
+        }
+
+        return tf;
     }
 }
