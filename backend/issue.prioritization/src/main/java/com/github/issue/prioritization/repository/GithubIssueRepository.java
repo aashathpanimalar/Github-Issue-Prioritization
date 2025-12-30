@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface GithubIssueRepository extends JpaRepository<GithubIssue, Integer> {
 
+    // ✅ Correct method based on entity
     List<GithubIssue> findByRepository(Repository repository);
 }

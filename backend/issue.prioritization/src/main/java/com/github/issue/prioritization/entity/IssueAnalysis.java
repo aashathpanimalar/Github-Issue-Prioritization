@@ -19,13 +19,60 @@ public class IssueAnalysis {
     private GithubIssue githubIssue;
 
     @Column(name = "predicted_priority", nullable = false)
-    private String predictedPriority; // HIGH / MEDIUM / LOW
+    private String predictedPriority;
 
-    @Column(name = "confidence_score")
+    @Column(name = "confidence_score", precision = 5, scale = 2)
     private BigDecimal confidenceScore;
 
     @Column(name = "analyzed_at")
     private LocalDateTime analyzedAt;
 
     // getters and setters
+
+    public Integer getAnalysisId() {
+        return analysisId;
+    }
+
+    public void setAnalysisId(Integer analysisId) {
+        this.analysisId = analysisId;
+    }
+
+    public GithubIssue getGithubIssue() {
+        return githubIssue;
+    }
+
+    public void setGithubIssue(GithubIssue githubIssue) {
+        this.githubIssue = githubIssue;
+    }
+
+    public String getPredictedPriority() {
+        return predictedPriority;
+    }
+
+    public void setPredictedPriority(String predictedPriority) {
+        this.predictedPriority = predictedPriority;
+    }
+
+    public BigDecimal  getConfidenceScore() {
+        return confidenceScore;
+    }
+
+    public void setConfidenceScore(BigDecimal  confidenceScore) {
+        this.confidenceScore = confidenceScore;
+    }
+
+    public LocalDateTime getAnalyzedAt() {
+        return analyzedAt;
+    }
+
+    public void setAnalyzedAt(LocalDateTime analyzedAt) {
+        this.analyzedAt = analyzedAt;
+    }
+
+//    public void setPriority(String priority) {
+//        this.priority=priority;
+//    }
+//
+//    public void setScore(double score) {
+//    }
 }

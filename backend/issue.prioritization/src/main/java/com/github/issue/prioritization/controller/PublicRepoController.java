@@ -2,7 +2,7 @@ package com.github.issue.prioritization.controller;
 
 import com.github.issue.prioritization.dto.PublicRepoRequest;
 import com.github.issue.prioritization.dto.PublicRepoResponse;
-import com.github.issue.prioritization.service.GitHubService;
+import com.github.issue.prioritization.service.PublicRepoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.*;
 public class PublicRepoController {
 
     @Autowired
-    private GitHubService gitHubService;
+    private PublicRepoService publicRepoService;
 
     @PostMapping("/analyze")
     public ResponseEntity<PublicRepoResponse> analyze(
             @RequestBody PublicRepoRequest request) {
 
         return ResponseEntity.ok(
-                gitHubService.analyzePublicRepo(request)
+                publicRepoService.analyzePublicRepo(request)
         );
     }
 }
