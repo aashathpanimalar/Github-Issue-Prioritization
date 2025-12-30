@@ -1,7 +1,6 @@
 package com.github.issue.prioritization.entity;
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -14,7 +13,7 @@ public class IssueAnalysis {
     @Column(name = "analysis_id")
     private Integer analysisId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "issue_id", nullable = false)
     private GithubIssue githubIssue;
 
@@ -27,7 +26,7 @@ public class IssueAnalysis {
     @Column(name = "analyzed_at")
     private LocalDateTime analyzedAt;
 
-    // getters and setters
+    // ===== Getters & Setters =====
 
     public Integer getAnalysisId() {
         return analysisId;
@@ -53,11 +52,11 @@ public class IssueAnalysis {
         this.predictedPriority = predictedPriority;
     }
 
-    public BigDecimal  getConfidenceScore() {
+    public BigDecimal getConfidenceScore() {
         return confidenceScore;
     }
 
-    public void setConfidenceScore(BigDecimal  confidenceScore) {
+    public void setConfidenceScore(BigDecimal confidenceScore) {
         this.confidenceScore = confidenceScore;
     }
 
@@ -68,11 +67,4 @@ public class IssueAnalysis {
     public void setAnalyzedAt(LocalDateTime analyzedAt) {
         this.analyzedAt = analyzedAt;
     }
-
-//    public void setPriority(String priority) {
-//        this.priority=priority;
-//    }
-//
-//    public void setScore(double score) {
-//    }
 }

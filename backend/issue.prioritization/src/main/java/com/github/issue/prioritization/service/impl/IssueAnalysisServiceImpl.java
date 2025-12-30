@@ -10,6 +10,7 @@ import com.github.issue.prioritization.repository.RepositoryRepository;
 import com.github.issue.prioritization.service.IssueAnalysisService;
 import com.github.issue.prioritization.ml.*;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -18,8 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class IssueAnalysisServiceImpl
-        implements IssueAnalysisService {
+public class IssueAnalysisServiceImpl implements IssueAnalysisService {
 
     private final GithubIssueRepository issueRepository;
     private final RepositoryRepository repositoryRepository;
@@ -36,49 +36,43 @@ public class IssueAnalysisServiceImpl
     }
 
     @Override
-    public List<IssueAnalysisResponse> analyzeIssues(
-            IssueAnalysisRequest request) {
+    public List<IssueAnalysisResponse> analyzeIssues(Integer repoId) {
 
-        Repository repository = repositoryRepository.findById(
-                request.getRepositoryId()
-        ).orElseThrow(() ->
-                new RuntimeException("Repository not found"));
+        Repository repo = repositoryRepository.findById(repoId)
+                .orElseThrow(() -> new RuntimeException("Repository not found"));
 
-        List<GithubIssue> issues =
-                issueRepository.findByRepository(repository);
+        List<GithubIssue> issues = issueRepository.findByRepository(repo);
 
         List<IssueAnalysisResponse> responses = new ArrayList<>();
 
         for (GithubIssue issue : issues) {
 
-            // 🔹 Combine issue text
-            String text =
-                    issue.getTitle() + " " +
-                            issue.getDescription();
+            String text = (issue.getTitle() + " " +
+                    issue.getDescription()).toLowerCase();
 
-            // 🔹 ML logic (placeholder)
-            double score = Math.random();
-            String priority =
-                    score > 0.7 ? "HIGH" :
-                            score > 0.4 ? "MEDIUM" : "LOW";
+            String priority;
+            if (text.contains("bug") || text.contains("error") ||
+                    text.contains("crash") || text.contains("fail")) {
+                priority = "HIGH";
+            } else if (text.contains("slow") || text.contains("improve")) {
+                priority = "MEDIUM";
+            } else {
+                priority = "LOW";
+            }
 
-            // 🔹 Save analysis result
             IssueAnalysis analysis = new IssueAnalysis();
             analysis.setGithubIssue(issue);
             analysis.setPredictedPriority(priority);
-            analysis.setConfidenceScore(BigDecimal.valueOf(score));
+            analysis.setConfidenceScore(null);
             analysis.setAnalyzedAt(LocalDateTime.now());
 
             analysisRepository.save(analysis);
 
-            // 🔹 API response
-            responses.add(
-                    new IssueAnalysisResponse(
-                            issue.getIssueId(),
-                            issue.getTitle(),
-                            priority
-                    )
-            );
+            responses.add(new IssueAnalysisResponse(
+                    issue.getIssueId(),
+                    issue.getTitle(),
+                    priority
+            ));
         }
 
         return responses;

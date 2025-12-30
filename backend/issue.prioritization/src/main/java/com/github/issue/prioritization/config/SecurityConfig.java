@@ -34,7 +34,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/public-repo/**",
-                                "/api/github/oauth/**"
+                                "/api/github/oauth/**",
+                                "/api/issues/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

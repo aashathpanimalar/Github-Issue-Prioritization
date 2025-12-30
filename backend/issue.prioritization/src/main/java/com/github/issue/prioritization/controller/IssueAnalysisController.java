@@ -1,15 +1,14 @@
 package com.github.issue.prioritization.controller;
 
-import com.github.issue.prioritization.dto.IssueAnalysisRequest;
 import com.github.issue.prioritization.dto.IssueAnalysisResponse;
 import com.github.issue.prioritization.service.IssueAnalysisService;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/issue-analysis")
+@RequestMapping("/api/issues")
 public class IssueAnalysisController {
 
     private final IssueAnalysisService issueAnalysisService;
@@ -18,10 +17,13 @@ public class IssueAnalysisController {
         this.issueAnalysisService = issueAnalysisService;
     }
 
-    @PostMapping("/analyze")
-    public List<IssueAnalysisResponse> analyzeIssues(
-            @RequestBody IssueAnalysisRequest request) {
+    @PostMapping("/analyze/{repoId}")
+    public ResponseEntity<List<IssueAnalysisResponse>> analyzeIssues(
+            @PathVariable Integer repoId) {
 
-        return issueAnalysisService.analyzeIssues(request);
+        List<IssueAnalysisResponse> response =
+                issueAnalysisService.analyzeIssues(repoId);
+
+        return ResponseEntity.ok(response);
     }
 }
