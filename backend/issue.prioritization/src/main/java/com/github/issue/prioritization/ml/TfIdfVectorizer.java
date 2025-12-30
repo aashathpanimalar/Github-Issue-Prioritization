@@ -4,20 +4,16 @@ import java.util.*;
 
 public class TfIdfVectorizer {
 
-    public static Map<String, Double> vectorize(String text) {
-
-        Map<String, Double> tf = new HashMap<>();
-        String[] words = text.split(" ");
+    public static Map<String, Double> tf(String text) {
+        Map<String, Double> tfMap = new HashMap<>();
+        String[] words = text.split("\\s+");
 
         for (String word : words) {
-            tf.put(word, tf.getOrDefault(word, 0.0) + 1.0);
+            tfMap.put(word, tfMap.getOrDefault(word, 0.0) + 1);
         }
 
-        // Normalize
-        for (String word : tf.keySet()) {
-            tf.put(word, tf.get(word) / words.length);
-        }
-
-        return tf;
+        int totalWords = words.length;
+        tfMap.replaceAll((k, v) -> v / totalWords);
+        return tfMap;
     }
 }

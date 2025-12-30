@@ -12,13 +12,13 @@ public class DuplicateIssue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "duplicate_id")
-    private Integer duplicateId;
+    private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "original_issue_id", nullable = false)
-    private GithubIssue originalIssue;
+    private GithubIssue issue;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "duplicate_issue_id", nullable = false)
     private GithubIssue duplicateIssue;
 
@@ -28,22 +28,22 @@ public class DuplicateIssue {
     @Column(name = "detected_at")
     private LocalDateTime detectedAt;
 
-    // ===== Getters & Setters =====
+    // getters & setters
 
-    public Integer getDuplicateId() {
-        return duplicateId;
+    public Integer getId() {
+        return id;
     }
 
-    public void setDuplicateId(Integer duplicateId) {
-        this.duplicateId = duplicateId;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public GithubIssue getOriginalIssue() {
-        return originalIssue;
+    public GithubIssue getIssue() {
+        return issue;
     }
 
-    public void setOriginalIssue(GithubIssue originalIssue) {
-        this.originalIssue = originalIssue;
+    public void setIssue(GithubIssue issue) {
+        this.issue = issue;
     }
 
     public GithubIssue getDuplicateIssue() {

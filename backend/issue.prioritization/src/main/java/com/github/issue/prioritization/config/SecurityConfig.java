@@ -33,10 +33,15 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/api/public-repo/**",
-                                "/api/github/oauth/**",
-                                "/api/issues/**"
+                                "/api/github/oauth/**"
                         ).permitAll()
+
+                        .requestMatchers(
+                                "/api/public-repo/**",
+                                "/api/issues/**",
+                                "/api/duplicates/**"
+                        ).authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

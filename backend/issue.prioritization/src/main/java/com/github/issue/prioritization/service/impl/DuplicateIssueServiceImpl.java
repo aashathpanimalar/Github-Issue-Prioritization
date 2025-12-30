@@ -1,28 +1,31 @@
 package com.github.issue.prioritization.service.impl;
 
 import com.github.issue.prioritization.entity.*;
+import com.github.issue.prioritization.ml.CosineSimilarity;
+import com.github.issue.prioritization.ml.DuplicateIssueDetector;
+import com.github.issue.prioritization.ml.TfIdfVectorizer;
 import com.github.issue.prioritization.repository.*;
 import com.github.issue.prioritization.service.DuplicateIssueService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
 
 @Service
 public class DuplicateIssueServiceImpl implements DuplicateIssueService {
 
     private final GithubIssueRepository issueRepository;
-    private final DuplicateIssueRepository duplicateRepository;
+    private final DuplicateIssueRepository duplicateIssueRepository;
     private final RepositoryRepository repositoryRepository;
 
     public DuplicateIssueServiceImpl(
             GithubIssueRepository issueRepository,
-            DuplicateIssueRepository duplicateRepository,
+            DuplicateIssueRepository duplicateIssueRepository,
             RepositoryRepository repositoryRepository) {
 
         this.issueRepository = issueRepository;
-        this.duplicateRepository = duplicateRepository;
+        this.duplicateIssueRepository = duplicateIssueRepository;
         this.repositoryRepository = repositoryRepository;
     }
 
@@ -41,43 +44,31 @@ public class DuplicateIssueServiceImpl implements DuplicateIssueService {
                 GithubIssue issue1 = issues.get(i);
                 GithubIssue issue2 = issues.get(j);
 
-                double similarity =
-                        calculateSimilarity(issue1, issue2);
+                String text1 = (issue1.getTitle() + " " +
+                        issue1.getDescription()).toLowerCase();
 
-                if (similarity >= 0.7) {
+                String text2 = (issue2.getTitle() + " " +
+                        issue2.getDescription()).toLowerCase();
+
+                var tf1 = TfIdfVectorizer.tf(text1);
+                var tf2 = TfIdfVectorizer.tf(text2);
+
+                double similarity =
+                        CosineSimilarity.calculate(tf1, tf2);
+
+                if (similarity >= 0.75) {
 
                     DuplicateIssue duplicate = new DuplicateIssue();
-                    duplicate.setOriginalIssue(issue1);
+                    duplicate.setIssue(issue1);
                     duplicate.setDuplicateIssue(issue2);
-                    duplicate.setSimilarityScore(BigDecimal.valueOf(similarity));
+                    duplicate.setSimilarityScore(
+                            BigDecimal.valueOf(similarity)
+                    );
                     duplicate.setDetectedAt(LocalDateTime.now());
 
-                    duplicateRepository.save(duplicate);
+                    duplicateIssueRepository.save(duplicate);
                 }
             }
         }
-    }
-
-    private double calculateSimilarity(
-            GithubIssue a, GithubIssue b) {
-
-        String textA = (a.getTitle() + " " + a.getDescription())
-                .toLowerCase();
-
-        String textB = (b.getTitle() + " " + b.getDescription())
-                .toLowerCase();
-
-        Set<String> wordsA = new HashSet<>(Arrays.asList(textA.split("\\s+")));
-        Set<String> wordsB = new HashSet<>(Arrays.asList(textB.split("\\s+")));
-
-        Set<String> intersection = new HashSet<>(wordsA);
-        intersection.retainAll(wordsB);
-
-        Set<String> union = new HashSet<>(wordsA);
-        union.addAll(wordsB);
-
-        if (union.isEmpty()) return 0.0;
-
-        return (double) intersection.size() / union.size();
     }
 }
