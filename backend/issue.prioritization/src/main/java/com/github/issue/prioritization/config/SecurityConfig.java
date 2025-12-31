@@ -33,11 +33,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/auth/**",
-                                "/api/github/oauth/**"
+                                "/api/github/oauth/**",
+                                "/api/public-repo/**"
                         ).permitAll()
 
                         .requestMatchers(
-                                "/api/public-repo/**",
                                 "/api/issues/**",
                                 "/api/duplicates/**"
                         ).authenticated()
@@ -52,3 +52,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+

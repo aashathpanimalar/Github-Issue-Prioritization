@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/duplicates")
+@RequestMapping("/api/issues")
 public class DuplicateIssueController {
 
     private final DuplicateIssueService duplicateIssueService;
@@ -14,7 +14,7 @@ public class DuplicateIssueController {
         this.duplicateIssueService = duplicateIssueService;
     }
 
-    @PostMapping("/detect/{repoId}")
+    @PostMapping("/detect-duplicates/{repoId}")
     public ResponseEntity<String> detectDuplicates(
             @PathVariable Integer repoId) {
 
@@ -22,3 +22,4 @@ public class DuplicateIssueController {
         return ResponseEntity.ok("Duplicate issue detection completed");
     }
 }
+

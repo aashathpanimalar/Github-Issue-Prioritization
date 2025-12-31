@@ -11,18 +11,17 @@ public class DuplicateIssue {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "duplicate_id")
-    private Integer id;
+    private Integer duplicateId;
 
     @ManyToOne
     @JoinColumn(name = "original_issue_id", nullable = false)
-    private GithubIssue issue;
+    private GithubIssue originalIssue;
 
     @ManyToOne
     @JoinColumn(name = "duplicate_issue_id", nullable = false)
     private GithubIssue duplicateIssue;
 
-    @Column(name = "similarity_score", precision = 5, scale = 2)
+    @Column(name = "similarity_score")
     private BigDecimal similarityScore;
 
     @Column(name = "detected_at")
@@ -30,20 +29,20 @@ public class DuplicateIssue {
 
     // getters & setters
 
-    public Integer getId() {
-        return id;
+    public Integer getDuplicateId() {
+        return duplicateId;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setDuplicateId(Integer duplicateId) {
+        this.duplicateId = duplicateId;
     }
 
-    public GithubIssue getIssue() {
-        return issue;
+    public GithubIssue getOriginalIssue() {
+        return originalIssue;
     }
 
-    public void setIssue(GithubIssue issue) {
-        this.issue = issue;
+    public void setOriginalIssue(GithubIssue originalIssue) {
+        this.originalIssue = originalIssue;
     }
 
     public GithubIssue getDuplicateIssue() {
