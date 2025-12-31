@@ -40,7 +40,13 @@ public class GitHubOAuthController {
     // STEP 1: START OAUTH
     // ============================
     @GetMapping("/start")
-    public ResponseEntity<Void> startOAuth(@RequestParam("token") String jwtToken) {
+    public ResponseEntity<Void> startOAuth(
+            @RequestParam("token") String jwtToken) {
+
+        // ✅ Validate JWT early
+        if (!jwtUtil.validateToken(jwtToken)) {
+            throw new RuntimeException("Invalid JWT token");
+        }
 
         String githubAuthUrl =
                 "https://github.com/login/oauth/authorize" +
@@ -52,7 +58,9 @@ public class GitHubOAuthController {
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(githubAuthUrl));
 
-        return ResponseEntity.status(HttpStatus.FOUND).headers(headers).build();
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .headers(headers)
+                .build();
     }
 
     // ============================
@@ -63,11 +71,12 @@ public class GitHubOAuthController {
             @RequestParam("code") String code,
             @RequestParam("state") String jwtToken) {
 
-        // 1️⃣ Extract email from JWT (state)
+        // 1️⃣ Extract email from JWT
         String email = jwtUtil.extractEmail(jwtToken);
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->
+                        new RuntimeException("User not found for OAuth"));
 
         // 2️⃣ Exchange code → access token
         String tokenUrl = "https://github.com/login/oauth/access_token";
@@ -75,17 +84,15 @@ public class GitHubOAuthController {
         HttpHeaders tokenHeaders = new HttpHeaders();
         tokenHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
 
-        HttpEntity<Map<String, String>> tokenRequest = new HttpEntity<>(
-                Map.of(
+        HttpEntity<Map<String, String>> tokenRequest =
+                new HttpEntity<>(Map.of(
                         "client_id", config.getClientId(),
                         "client_secret", config.getClientSecret(),
                         "code", code
-                ),
-                tokenHeaders
-        );
+                ), tokenHeaders);
 
-        Map tokenResponse = restTemplate
-                .postForObject(tokenUrl, tokenRequest, Map.class);
+        Map<String, Object> tokenResponse =
+                restTemplate.postForObject(tokenUrl, tokenRequest, Map.class);
 
         String accessToken = (String) tokenResponse.get("access_token");
 
@@ -97,23 +104,27 @@ public class GitHubOAuthController {
         HttpHeaders userHeaders = new HttpHeaders();
         userHeaders.setBearerAuth(accessToken);
 
-        ResponseEntity<Map> userResponse = restTemplate.exchange(
-                "https://api.github.com/user",
-                HttpMethod.GET,
-                new HttpEntity<>(userHeaders),
-                Map.class
-        );
+        ResponseEntity<Map> userResponse =
+                restTemplate.exchange(
+                        "https://api.github.com/user",
+                        HttpMethod.GET,
+                        new HttpEntity<>(userHeaders),
+                        Map.class
+                );
 
         Map githubUser = userResponse.getBody();
 
+        // 4️⃣ Save / Update github_auth
         GithubAuth auth = githubAuthRepository
                 .findByUser(user)
                 .orElse(new GithubAuth());
 
         auth.setUser(user);
-        auth.setGithubUserId(((Number) githubUser.get("id")).longValue());
+        auth.setGithubUserId(
+                ((Number) githubUser.get("id")).longValue()
+        );
         auth.setGithubUsername((String) githubUser.get("login"));
-        auth.setGithubEmail((String) githubUser.get("email"));
+        auth.setGithubEmail((String) githubUser.get("email")); // may be null
         auth.setAvatarUrl((String) githubUser.get("avatar_url"));
         auth.setAccessToken(accessToken);
         auth.setUpdatedAt(LocalDateTime.now());

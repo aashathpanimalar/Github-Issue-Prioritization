@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 "/api/duplicates/**"
                         ).authenticated()
 
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
