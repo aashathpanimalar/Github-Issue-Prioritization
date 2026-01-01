@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 
@@ -127,13 +129,17 @@ public class IssueFetchServiceImpl implements IssueFetchService {
             issue.setIssueState((String) issueData.get("state"));
 
             if (issueData.get("created_at") != null) {
-                issue.setCreatedDate(
-                        LocalDateTime.parse(
-                                issueData.get("created_at")
-                                        .toString()
-                                        .replace("Z", "")
-                        )
-                );
+
+                OffsetDateTime utcTime =
+                        OffsetDateTime.parse(issueData.get("created_at").toString());
+
+                LocalDateTime localTime =
+                        utcTime
+                                .atZoneSameInstant(ZoneId.systemDefault())
+                                .toLocalDateTime();
+
+                issue.setCreatedDate(localTime);
+
             } else {
                 issue.setCreatedDate(LocalDateTime.now());
             }

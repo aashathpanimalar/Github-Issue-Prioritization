@@ -5,7 +5,7 @@ import com.github.issue.prioritization.dto.PublicRepoResponse;
 import com.github.issue.prioritization.entity.Repository;
 import com.github.issue.prioritization.exception.InvalidOrPrivateRepoException;
 import com.github.issue.prioritization.repository.RepositoryRepository;
-import com.github.issue.prioritization.service.PublicRepoService;
+import com.github.issue.prioritization.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -24,9 +24,22 @@ public class PublicRepoServiceImpl implements PublicRepoService {
     @Autowired
     private RepositoryRepository repositoryRepository;
 
+    // 🔥 REUSED SERVICES (already implemented)
+    @Autowired
+    private IssueFetchService issueFetchService;
+
+    @Autowired
+    private IssueAnalysisService issueAnalysisService;
+
+    @Autowired
+    private DuplicateIssueService duplicateIssueService;
+
     @Override
     public PublicRepoResponse analyzePublicRepo(PublicRepoRequest request) {
 
+        // ===============================
+        // 1️⃣ Parse & validate URL
+        // ===============================
         String cleanUrl = request.getRepoUrl()
                 .replace("https://github.com/", "")
                 .replaceAll("/$", "");
@@ -42,6 +55,9 @@ public class PublicRepoServiceImpl implements PublicRepoService {
         String apiUrl = "https://api.github.com/repos/" + owner + "/" + repo;
 
         try {
+            // ===============================
+            // 2️⃣ Call GitHub Public API
+            // ===============================
             HttpHeaders headers = new HttpHeaders();
             headers.set("Accept", "application/vnd.github+json");
             headers.set("User-Agent", "Issue-Prioritization-App");
@@ -60,11 +76,24 @@ public class PublicRepoServiceImpl implements PublicRepoService {
                 throw new InvalidOrPrivateRepoException("Empty GitHub response");
             }
 
+            // ===============================
+            // 3️⃣ Ensure PUBLIC repository
+            // ===============================
+            Boolean isPrivate = (Boolean) response.get("private");
+            if (Boolean.TRUE.equals(isPrivate)) {
+                throw new InvalidOrPrivateRepoException(
+                        "This is a private repository. Use private repo option."
+                );
+            }
+
             String repoName = (String) response.get("name");
             int openIssues = response.get("open_issues_count") != null
                     ? ((Number) response.get("open_issues_count")).intValue()
                     : 0;
 
+            // ===============================
+            // 4️⃣ Save repository
+            // ===============================
             Repository repository = new Repository();
             repository.setUser(null); // PUBLIC repo
             repository.setRepoOwner(owner);
@@ -73,17 +102,34 @@ public class PublicRepoServiceImpl implements PublicRepoService {
             repository.setRepoType("PUBLIC");
             repository.setAnalyzedAt(LocalDateTime.now());
 
-            repositoryRepository.save(repository);
+            repository = repositoryRepository.save(repository);
 
-            return new PublicRepoResponse(repoName, owner, openIssues);
+            // ===============================
+            // 🔥 5️⃣ FULL PIPELINE EXECUTION
+            // ===============================
+            issueFetchService.fetchAndStoreIssues(repository.getRepoId());
+            issueAnalysisService.analyzeIssues(repository.getRepoId());
+            duplicateIssueService.detectDuplicates(repository.getRepoId());
+
+            // ===============================
+            // 6️⃣ Response
+            // ===============================
+            return new PublicRepoResponse(
+                    repoName,
+                    owner,
+                    openIssues
+            );
 
         } catch (HttpClientErrorException e) {
+
             if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
                 throw new InvalidOrPrivateRepoException("Repository not found");
             }
+
             if (e.getStatusCode() == HttpStatus.FORBIDDEN) {
                 throw new InvalidOrPrivateRepoException("GitHub API rate limit exceeded");
             }
+
             throw new InvalidOrPrivateRepoException("GitHub API error");
         }
     }

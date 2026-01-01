@@ -42,13 +42,15 @@ public class DuplicateIssueServiceImpl implements DuplicateIssueService {
 
                 double similarity = calculateImprovedSimilarity(issue1, issue2);
 
-                // 🔽 Lower threshold after normalization
-                if (similarity >= 0.4) {
+                // ✅ Practical threshold for semantic similarity
+                if (similarity >= 0.40) {
 
                     DuplicateIssue duplicate = new DuplicateIssue();
                     duplicate.setOriginalIssue(issue1);
                     duplicate.setDuplicateIssue(issue2);
-                    duplicate.setSimilarityScore(BigDecimal.valueOf(similarity));
+                    duplicate.setSimilarityScore(
+                            BigDecimal.valueOf(similarity).setScale(2, BigDecimal.ROUND_HALF_UP)
+                    );
                     duplicate.setDetectedAt(LocalDateTime.now());
 
                     duplicateRepository.save(duplicate);
@@ -61,51 +63,77 @@ public class DuplicateIssueServiceImpl implements DuplicateIssueService {
 
     private double calculateImprovedSimilarity(GithubIssue a, GithubIssue b) {
 
-        Set<String> wordsA = preprocessText(a.getTitle() + " " + a.getDescription());
-        Set<String> wordsB = preprocessText(b.getTitle() + " " + b.getDescription());
+        Map<String, Integer> vectorA = buildWeightedVector(
+                a.getTitle() + " " + a.getDescription()
+        );
+        Map<String, Integer> vectorB = buildWeightedVector(
+                b.getTitle() + " " + b.getDescription()
+        );
 
-        Set<String> intersection = new HashSet<>(wordsA);
-        intersection.retainAll(wordsB);
-
-        Set<String> union = new HashSet<>(wordsA);
-        union.addAll(wordsB);
-
-        if (union.isEmpty()) return 0.0;
-
-        return (double) intersection.size() / union.size();
+        return cosineSimilarity(vectorA, vectorB);
     }
 
-    // ================= TEXT PREPROCESSING =================
+    // ================= TF-IDF STYLE VECTOR =================
 
-    private Set<String> preprocessText(String text) {
+    private Map<String, Integer> buildWeightedVector(String text) {
 
-        // Common stop words
         Set<String> stopWords = Set.of(
-                "a", "the", "is", "to", "when", "on", "in", "very", "and"
+                "a", "the", "is", "to", "when", "on", "in", "very",
+                "and", "of", "for", "with", "this", "that"
         );
 
         String normalized = text
                 .toLowerCase()
-                .replaceAll("[^a-z ]", "")   // remove punctuation
-                .replaceAll("\\s+", " ");    // normalize spaces
+                .replaceAll("[^a-z ]", " ")
+                .replaceAll("\\s+", " ");
 
         String[] tokens = normalized.split(" ");
 
-        Set<String> result = new HashSet<>();
+        Map<String, Integer> vector = new HashMap<>();
 
         for (String word : tokens) {
+
             if (word.length() <= 2) continue;
             if (stopWords.contains(word)) continue;
 
-            // simple stemming
+            // 🔹 Simple stemming
             word = word
                     .replaceAll("ing$", "")
+                    .replaceAll("ed$", "")
                     .replaceAll("ly$", "")
                     .replaceAll("s$", "");
 
-            result.add(word);
+            vector.put(word, vector.getOrDefault(word, 0) + 1);
         }
 
-        return result;
+        return vector;
+    }
+
+    // ================= COSINE SIMILARITY =================
+
+    private double cosineSimilarity(
+            Map<String, Integer> vecA,
+            Map<String, Integer> vecB) {
+
+        Set<String> allWords = new HashSet<>();
+        allWords.addAll(vecA.keySet());
+        allWords.addAll(vecB.keySet());
+
+        double dotProduct = 0.0;
+        double magnitudeA = 0.0;
+        double magnitudeB = 0.0;
+
+        for (String word : allWords) {
+            int a = vecA.getOrDefault(word, 0);
+            int b = vecB.getOrDefault(word, 0);
+
+            dotProduct += a * b;
+            magnitudeA += a * a;
+            magnitudeB += b * b;
+        }
+
+        if (magnitudeA == 0 || magnitudeB == 0) return 0.0;
+
+        return dotProduct / (Math.sqrt(magnitudeA) * Math.sqrt(magnitudeB));
     }
 }

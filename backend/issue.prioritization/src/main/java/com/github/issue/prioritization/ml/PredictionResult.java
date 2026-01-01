@@ -2,8 +2,8 @@ package com.github.issue.prioritization.ml;
 
 public class PredictionResult {
 
-    private String priority;
-    private double confidence;
+    private final String priority;
+    private final double confidence;
 
     public PredictionResult(String priority, double confidence) {
         this.priority = priority;

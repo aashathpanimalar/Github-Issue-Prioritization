@@ -13,6 +13,7 @@ import com.github.issue.prioritization.service.IssueAnalysisService;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,19 +48,29 @@ public class IssueAnalysisServiceImpl implements IssueAnalysisService {
 
         for (GithubIssue issue : issues) {
 
-            // ✅ ML prediction
+            // ============================
+            // ✅ NAIVE BAYES ML PREDICTION
+            // ============================
             MLPredictionResult result =
                     MlIssuePrioritizer.analyze(
                             issue.getTitle(),
                             issue.getDescription()
                     );
 
+            // 🛡 Safety: confidence should never be 0 or null
+            double rawConfidence = result.getConfidence();
+            if (rawConfidence <= 0.0) {
+                rawConfidence = 0.05; // minimal confidence instead of 0.00
+            }
+
+            BigDecimal confidence =
+                    BigDecimal.valueOf(rawConfidence)
+                            .setScale(2, RoundingMode.HALF_UP);
+
             IssueAnalysis analysis = new IssueAnalysis();
             analysis.setGithubIssue(issue);
             analysis.setPredictedPriority(result.getPriority());
-            analysis.setConfidenceScore(
-                    BigDecimal.valueOf(result.getConfidence())
-            );
+            analysis.setConfidenceScore(confidence);
             analysis.setAnalyzedAt(LocalDateTime.now());
 
             analysisRepository.save(analysis);
