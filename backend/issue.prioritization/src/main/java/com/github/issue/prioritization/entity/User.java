@@ -28,15 +28,18 @@ public class User {
     @Column(name = "email_verified")
     private Boolean emailVerified;
 
-    // 🔹 Forgot password fields
-    @Column(name = "reset_otp")
-    private String resetOtp;
+    // 🔹 Signup OTP
+    @Column(name = "signup_otp")
+    private String signupOtp;
 
-    @Column(name = "reset_otp_expiry")
+    @Column(name = "signup_otp_expiry")
+    private LocalDateTime signupOtpExpiry;
+
+    // 🔹 Forgot password OTP
+    private String resetOtp;
     private LocalDateTime resetOtpExpiry;
 
-    // ================== GETTERS & SETTERS ==================
-
+    // getters & setters
     public Integer getUserId() {
         return userId;
     }
@@ -77,6 +80,22 @@ public class User {
         this.emailVerified = emailVerified;
     }
 
+    public String getSignupOtp() {
+        return signupOtp;
+    }
+
+    public void setSignupOtp(String signupOtp) {
+        this.signupOtp = signupOtp;
+    }
+
+    public LocalDateTime getSignupOtpExpiry() {
+        return signupOtpExpiry;
+    }
+
+    public void setSignupOtpExpiry(LocalDateTime signupOtpExpiry) {
+        this.signupOtpExpiry = signupOtpExpiry;
+    }
+
     public String getResetOtp() {
         return resetOtp;
     }
@@ -92,4 +111,5 @@ public class User {
     public void setResetOtpExpiry(LocalDateTime resetOtpExpiry) {
         this.resetOtpExpiry = resetOtpExpiry;
     }
+
 }
