@@ -1,0 +1,16 @@
+2026-01-04T20:57:44.512335400 - DEBUG: GitHub OAuth callback received. Code: test...
+2026-01-04T20:57:44.528157400 - ERROR: GitHub OAuth callback failed: JWT strings must contain exactly 2 period characters. Found: 0
+2026-01-04T20:59:05.529689500 - DEBUG: GitHub OAuth start request. Token provided: false
+2026-01-04T20:59:05.535707300 - ERROR: JWT Validation FAILED for GitHub OAuth start
+2026-01-04T20:59:48.220003900 - DEBUG: GitHub OAuth start request. Token provided: true
+2026-01-04T20:59:48.234821100 - DEBUG: JWT Validation SUCCESS for GitHub OAuth start
+2026-01-04T20:59:48.244036400 - DEBUG: Redirecting to GitHub: https://github.com/login/oauth/authorize?client_id=Ov23ctXzMStM3mJ3v9z7&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fapi%2Fgithub%2Foauth%2Fcallback&scope=repo,user&state=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJwcmFkZWVwa3Jpc2huYTE0MEBnbWFpbC5jb20iLCJpYXQiOjE3Njc1Mzg5MjcsImV4cCI6MTc2NzYyNTMyN30.dv9xLWYVfbZDNN-VbLpoVbdYeo1YfbUlQ3yQhogSxT8v2uDq91lTCqpyxPSzx6Ko
+2026-01-04T21:03:30.478118600 - DEBUG: GitHub OAuth start request. Token provided: true
+2026-01-04T21:03:30.565104600 - DEBUG: JWT Validation SUCCESS for GitHub OAuth start
+2026-01-04T21:03:30.577632500 - DEBUG: Redirecting to GitHub: https://github.com/login/oauth/authorize?client_id=Ov23ctXzMStM3mJ3v9z7&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fapi%2Fgithub%2Foauth%2Fcallback&scope=repo,user&state=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJwcmFkZWVwa3Jpc2huYTE0MEBnbWFpbC5jb20iLCJpYXQiOjE3Njc1Mzg5MjcsImV4cCI6MTc2NzYyNTMyN30.dv9xLWYVfbZDNN-VbLpoVbdYeo1YfbUlQ3yQhogSxT8v2uDq91lTCqpyxPSzx6Ko
+2026-01-04T21:11:54.417250 - DEBUG: GitHub OAuth start request. Token provided: true
+2026-01-04T21:11:54.585577400 - DEBUG: JWT Validation SUCCESS for GitHub OAuth start
+2026-01-04T21:11:54.640946700 - DEBUG: Redirecting to GitHub: https://github.com/login/oauth/authorize?client_id=Ov23ctXzMStM3mJ3v9z7&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fapi%2Fgithub%2Foauth%2Fcallback&scope=repo,user&state=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJwcmFkZWVwa3Jpc2huYTE0MEBnbWFpbC5jb20iLCJpYXQiOjE3Njc1Mzg5MjcsImV4cCI6MTc2NzYyNTMyN30.dv9xLWYVfbZDNN-VbLpoVbdYeo1YfbUlQ3yQhogSxT8v2uDq91lTCqpyxPSzx6Ko
+2026-01-04T21:22:38.861786 - DEBUG: GitHub OAuth start request. Token provided: true
+2026-01-04T21:22:38.905164100 - DEBUG: JWT Validation SUCCESS for GitHub OAuth start
+2026-01-04T21:22:38.945383300 - DEBUG: Redirecting to GitHub: https://github.com/login/oauth/authorize?client_id=Ov23ctXzMStM3mJ3v9z7&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fapi%2Fgithub%2Foauth%2Fcallback&scope=repo,user&state=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJwcmFkZWVwa3Jpc2huYTE0MEBnbWFpbC5jb20iLCJpYXQiOjE3Njc1Mzg5MjcsImV4cCI6MTc2NzYyNTMyN30.dv9xLWYVfbZDNN-VbLpoVbdYeo1YfbUlQ3yQhogSxT8v2uDq91lTCqpyxPSzx6Ko

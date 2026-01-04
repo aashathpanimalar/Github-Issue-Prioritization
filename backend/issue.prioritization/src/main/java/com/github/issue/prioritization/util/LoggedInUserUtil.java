@@ -15,13 +15,19 @@ public class LoggedInUserUtil {
     }
 
     public User getLoggedInUser() {
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
+            throw new RuntimeException("No authentication found in security context");
+        }
 
-        String email = (String) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (principal instanceof String) {
+            String email = (String) principal;
+            return userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + email));
+        }
+
+        throw new RuntimeException(
+                "Invalid principal type: " + (principal != null ? principal.getClass().getName() : "null"));
     }
 }
