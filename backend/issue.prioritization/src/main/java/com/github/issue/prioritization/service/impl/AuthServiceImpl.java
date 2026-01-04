@@ -10,6 +10,7 @@ import com.github.issue.prioritization.entity.User;
 import com.github.issue.prioritization.repository.UserRepository;
 import com.github.issue.prioritization.service.AuthService;
 import com.github.issue.prioritization.service.EmailService;
+import com.github.issue.prioritization.exception.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,13 +31,12 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // ================= SIGNUP WITH OTP (UPDATED LOGIC) =================
+    // ================= SIGNUP WITH OTP =================
     @Override
     public void signup(SignupRequest request) {
 
         User user;
 
-        // 🔎 Check if email already exists
         Optional<User> existingUser =
                 userRepository.findByEmail(request.getEmail());
 
@@ -45,20 +45,20 @@ public class AuthServiceImpl implements AuthService {
 
             user = existingUser.get();
 
-            // ❌ Already verified → block signup
+            // ❌ Already verified
             if (Boolean.TRUE.equals(user.getEmailVerified())) {
-                throw new RuntimeException("Email already registered and verified");
+                throw new ConflictException(
+                        "Email already registered and verified"
+                );
             }
 
-            // 🔁 NOT verified → resend OTP
+            // 🔁 Resend OTP
             String otp = generateOtp();
-
             user.setSignupOtp(otp);
             user.setSignupOtpExpiry(LocalDateTime.now().plusMinutes(10));
 
             userRepository.save(user);
             emailService.sendOtp(user.getEmail(), otp);
-
             return;
         }
 
@@ -81,18 +81,18 @@ public class AuthServiceImpl implements AuthService {
     public void verifySignupOtp(VerifySignupOtpRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found"));
 
         if (user.getSignupOtp() == null ||
                 !user.getSignupOtp().equals(request.getOtp())) {
-            throw new RuntimeException("Invalid OTP");
+            throw new UnauthorizedException("Invalid OTP");
         }
 
         if (user.getSignupOtpExpiry().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("OTP expired");
+            throw new UnauthorizedException("OTP expired");
         }
 
-        // ✅ Mark verified
         user.setEmailVerified(true);
         user.setSignupOtp(null);
         user.setSignupOtpExpiry(null);
@@ -105,14 +105,17 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponse login(LoginRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+                .orElseThrow(() ->
+                        new UnauthorizedException("Invalid email or password"));
 
         if (!Boolean.TRUE.equals(user.getEmailVerified())) {
-            throw new RuntimeException("Email not verified");
+            throw new UnauthorizedException(
+                    "Email not verified. Please verify OTP"
+            );
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+            throw new UnauthorizedException("Invalid email or password");
         }
 
         String token = jwtUtil.generateToken(user.getEmail());
@@ -124,10 +127,10 @@ public class AuthServiceImpl implements AuthService {
     public void sendResetOtp(String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Email not registered"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Email not registered"));
 
         String otp = generateOtp();
-
         user.setResetOtp(otp);
         user.setResetOtpExpiry(LocalDateTime.now().plusMinutes(10));
 
@@ -139,14 +142,15 @@ public class AuthServiceImpl implements AuthService {
     public void resetPassword(ResetPasswordRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Invalid email"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Invalid email"));
 
         if (!request.getOtp().equals(user.getResetOtp())) {
-            throw new RuntimeException("Invalid OTP");
+            throw new UnauthorizedException("Invalid OTP");
         }
 
         if (user.getResetOtpExpiry().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("OTP expired");
+            throw new UnauthorizedException("OTP expired");
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
