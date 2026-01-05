@@ -37,8 +37,8 @@ public class AuthServiceImpl implements AuthService {
 
         User user;
 
-        Optional<User> existingUser =
-                userRepository.findByEmail(request.getEmail());
+        // 🔎 Check if email already exists
+        Optional<User> existingUser = userRepository.findByEmail(request.getEmail());
 
         // ================= CASE 1: EMAIL EXISTS =================
         if (existingUser.isPresent()) {
@@ -78,6 +78,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     // ================= VERIFY SIGNUP OTP =================
+    @Override
     public void verifySignupOtp(VerifySignupOtpRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
@@ -119,7 +120,8 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String token = jwtUtil.generateToken(user.getEmail());
-        return new LoginResponse(token);
+        UserDto userDto = new UserDto(user.getUserId(), user.getName(), user.getEmail());
+        return new LoginResponse(token, userDto);
     }
 
     // ================= FORGOT PASSWORD =================

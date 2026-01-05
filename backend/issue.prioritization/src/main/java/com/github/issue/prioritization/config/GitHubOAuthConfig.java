@@ -16,14 +16,14 @@ public class GitHubOAuthConfig {
     private String redirectUri;
 
     public String getClientId() {
-        return clientId;
+        return clientId != null ? clientId.trim() : null;
     }
 
     public String getClientSecret() {
-        return clientSecret;
+        return clientSecret != null ? clientSecret.trim() : null;
     }
 
     public String getRedirectUri() {
-        return redirectUri;
+        return redirectUri != null ? redirectUri.trim() : null;
     }
 }

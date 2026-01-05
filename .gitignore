@@ -16,5 +16,5 @@ backend/.settings/
 # OS
 .DS_Store
 
-# Ignore Spring Boot application properties
-backend/issue.prioritization/src/main/resources/application.properties
+# Ignore Spring Boot application properties (DISABLED FOR NOW)
+# backend/issue.prioritization/src/main/resources/application.properties

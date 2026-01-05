@@ -68,8 +68,7 @@ public class PublicRepoServiceImpl implements PublicRepoService {
                     apiUrl,
                     HttpMethod.GET,
                     entity,
-                    Map.class
-            );
+                    Map.class);
 
             Map<String, Object> response = responseEntity.getBody();
             if (response == null) {
@@ -82,8 +81,7 @@ public class PublicRepoServiceImpl implements PublicRepoService {
             Boolean isPrivate = (Boolean) response.get("private");
             if (Boolean.TRUE.equals(isPrivate)) {
                 throw new InvalidOrPrivateRepoException(
-                        "This is a private repository. Use private repo option."
-                );
+                        "This is a private repository. Use private repo option.");
             }
 
             String repoName = (String) response.get("name");
@@ -115,10 +113,10 @@ public class PublicRepoServiceImpl implements PublicRepoService {
             // 6️⃣ Response
             // ===============================
             return new PublicRepoResponse(
+                    repository.getRepoId(),
                     repoName,
                     owner,
-                    openIssues
-            );
+                    openIssues);
 
         } catch (HttpClientErrorException e) {
 

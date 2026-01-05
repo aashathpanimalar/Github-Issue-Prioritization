@@ -2,44 +2,27 @@ package com.github.issue.prioritization.ml;
 
 public class MlIssuePrioritizer {
 
-    public static MLPredictionResult analyze(String title, String description) {
+    private static final NaiveBayesClassifier classifier = new NaiveBayesClassifier();
 
+    static {
+        // 🔴 Train with HIGH priority examples
+        classifier.train("critical crash error fail exception system down bug security vulnerability", "HIGH");
+        classifier.train("major failure blocking production data loss urgent fix needed", "HIGH");
+
+        // 🟠 Train with MEDIUM priority examples
+        classifier.train("slow performance improvement delay optimization feature request", "MEDIUM");
+        classifier.train("refactor code base cleanup update dependencies minor enhancement", "MEDIUM");
+
+        // 🟢 Train with LOW priority examples
+        classifier.train("typo in documentation ui alignment color change text update", "LOW");
+        classifier.train("cosmetic fix label update feedback suggested change", "LOW");
+    }
+
+    public static MLPredictionResult analyze(String title, String description) {
         String text = (title + " " + description).toLowerCase();
 
-        double score = 0.0;
+        PredictionResult result = classifier.predict(text);
 
-        // 🔴 High severity words
-        if (text.contains("crash") || text.contains("error")
-                || text.contains("fail") || text.contains("exception")
-                || text.contains("500")) {
-            score += 0.7;
-        }
-
-        // 🟠 Medium severity words
-        if (text.contains("slow") || text.contains("delay")
-                || text.contains("improve") || text.contains("performance")) {
-            score += 0.4;
-        }
-
-        // 🟢 Low severity words
-        if (text.contains("typo") || text.contains("ui")
-                || text.contains("text") || text.contains("alignment")) {
-            score += 0.2;
-        }
-
-        // ✅ Decide priority
-        String priority;
-        if (score >= 0.7) {
-            priority = "HIGH";
-        } else if (score >= 0.4) {
-            priority = "MEDIUM";
-        } else {
-            priority = "LOW";
-        }
-
-        // ✅ Confidence score (0.0 – 1.0)
-        double confidence = Math.min(score, 1.0);
-
-        return new MLPredictionResult(priority, confidence);
+        return new MLPredictionResult(result.getPriority(), result.getConfidence());
     }
 }
