@@ -52,52 +52,48 @@ public class GitHubOAuthController {
         @GetMapping("/start")
         public ResponseEntity<Void> startOAuth(
                         @RequestParam(value = "token", required = false) String jwtToken,
+                        @RequestParam(value = "mode", defaultValue = "connect") String mode,
                         jakarta.servlet.http.HttpServletRequest request) {
 
-                String token = jwtToken;
+                String state = mode;
 
-                // Try to get from cookies if param is missing
-                if (token == null || token.isEmpty()) {
-                        jakarta.servlet.http.Cookie[] cookies = request.getCookies();
-                        if (cookies != null) {
-                                for (jakarta.servlet.http.Cookie cookie : cookies) {
-                                        if ("token".equals(cookie.getName())) {
-                                                token = cookie.getValue();
-                                                break;
+                if ("connect".equals(mode)) {
+                        String token = jwtToken;
+
+                        // Try to get from cookies if param is missing
+                        if (token == null || token.isEmpty()) {
+                                jakarta.servlet.http.Cookie[] cookies = request.getCookies();
+                                if (cookies != null) {
+                                        for (jakarta.servlet.http.Cookie cookie : cookies) {
+                                                if ("token".equals(cookie.getName())) {
+                                                        token = cookie.getValue();
+                                                        break;
+                                                }
                                         }
                                 }
                         }
+
+                        // ✅ Validate JWT for connect mode
+                        if (token == null || !jwtUtil.validateToken(token)) {
+                                logToFile("ERROR: JWT Validation FAILED for GitHub OAuth connect");
+                                return ResponseEntity.status(HttpStatus.FOUND)
+                                                .location(URI.create(
+                                                                "http://localhost:3000/dashboard?status=error&message=Invalid+session+token"))
+                                                .build();
+                        }
+                        state = "connect:" + token;
                 }
-
-                System.out.println("DEBUG: GitHub OAuth start request received with token: "
-                                + (token != null ? token.substring(0, 10) : "null") + "...");
-
-                logToFile("DEBUG: GitHub OAuth start request. Token provided: " + (token != null));
-
-                // ✅ Validate JWT early
-                if (token == null || !jwtUtil.validateToken(token)) {
-                        logToFile("ERROR: JWT Validation FAILED for GitHub OAuth start");
-                        return ResponseEntity.status(HttpStatus.FOUND)
-                                        .location(URI.create(
-                                                        "http://localhost:3000/dashboard?status=error&message=Invalid+session+token"))
-                                        .build();
-                }
-
-                logToFile("DEBUG: JWT Validation SUCCESS for GitHub OAuth start");
 
                 String githubAuthUrl = "https://github.com/login/oauth/authorize" +
                                 "?client_id=" + config.getClientId() +
                                 "&redirect_uri=" + URLEncoder.encode(config.getRedirectUri(), StandardCharsets.UTF_8) +
-                                "&scope=repo,user" +
-                                "&state=" + token;
+                                "&scope=repo,user,user:email" +
+                                "&state=" + state;
 
                 logToFile("DEBUG: Redirecting to GitHub: " + githubAuthUrl);
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.setLocation(URI.create(githubAuthUrl));
-
                 return ResponseEntity.status(HttpStatus.FOUND)
-                                .headers(headers)
+                                .location(URI.create(githubAuthUrl))
                                 .build();
         }
 
@@ -107,30 +103,27 @@ public class GitHubOAuthController {
         @GetMapping("/callback")
         public ResponseEntity<?> githubCallback(
                         @RequestParam("code") String code,
-                        @RequestParam("state") String jwtToken) {
+                        @RequestParam("state") String state) {
 
-                logToFile("DEBUG: GitHub OAuth callback received. Code: " +
-                                (code.length() > 5 ? code.substring(0, 5) : code) + "...");
+                logToFile("DEBUG: GitHub OAuth callback received. State: " + state);
 
                 try {
-                        // 1️⃣ Extract email from JWT
-                        String email = jwtUtil.extractEmail(jwtToken);
-                        logToFile("DEBUG: Extracted email from state: " + email);
+                        String mode = state.startsWith("connect:") ? "connect" : "login";
+                        String jwtToken = mode.equals("connect") ? state.substring(8) : null;
 
-                        User user = userRepository.findByEmail(email)
-                                        .orElseThrow(() -> new RuntimeException("User not found for OAuth: " + email));
-
-                        // 2️⃣ Exchange code → access token
+                        // 1️⃣ Exchange code → access token
                         String tokenUrl = "https://github.com/login/oauth/access_token";
-
                         HttpHeaders tokenHeaders = new HttpHeaders();
                         tokenHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
+                        // GitHub requires a User-Agent header
+                        tokenHeaders.add("User-Agent", "IssuePrioritizationApp");
 
                         HttpEntity<Map<String, String>> tokenRequest = new HttpEntity<>(Map.of(
                                         "client_id", config.getClientId(),
                                         "client_secret", config.getClientSecret(),
                                         "code", code), tokenHeaders);
 
+                        logToFile("DEBUG: Requesting access token from: " + tokenUrl);
                         Map<String, Object> tokenResponse = restTemplate.postForObject(tokenUrl, tokenRequest,
                                         Map.class);
 
@@ -140,12 +133,14 @@ public class GitHubOAuthController {
                         }
 
                         String accessToken = (String) tokenResponse.get("access_token");
-                        logToFile("DEBUG: Received access token from GitHub");
+                        logToFile("DEBUG: Access token received successfully.");
 
-                        // 3️⃣ Fetch GitHub user info
+                        // 2️⃣ Fetch GitHub user info
                         HttpHeaders userHeaders = new HttpHeaders();
                         userHeaders.setBearerAuth(accessToken);
+                        userHeaders.add("User-Agent", "IssuePrioritizationApp");
 
+                        logToFile("DEBUG: Fetching user info from https://api.github.com/user");
                         ResponseEntity<Map> userResponse = restTemplate.exchange(
                                         "https://api.github.com/user",
                                         HttpMethod.GET,
@@ -153,41 +148,94 @@ public class GitHubOAuthController {
                                         Map.class);
 
                         Map githubUser = userResponse.getBody();
-                        logToFile("DEBUG: Fetched GitHub user info for: " + githubUser.get("login"));
+                        Long githubId = ((Number) githubUser.get("id")).longValue();
+                        String githubLogin = (String) githubUser.get("login");
+                        logToFile("DEBUG: User info received for: " + githubLogin);
 
-                        // 4️⃣ Save / Update github_auth
-                        GithubAuth auth = githubAuthRepository
-                                        .findByUser(user)
-                                        .orElse(new GithubAuth());
+                        // 3️⃣ Fetch/Identify User
+                        User user = null;
+                        if (mode.equals("connect")) {
+                                String userEmail = jwtUtil.extractEmail(jwtToken);
+                                user = userRepository.findByEmail(userEmail)
+                                                .orElseThrow(() -> new RuntimeException(
+                                                                "User not found: " + userEmail));
+                        } else {
+                                // Login/Signup mode: Try to find by GitHub user ID first
+                                Optional<GithubAuth> existingAuth = githubAuthRepository.findByGithubUserId(githubId);
+                                if (existingAuth.isPresent()) {
+                                        user = existingAuth.get().getUser();
+                                } else {
+                                        // Need to find by email or create new
+                                        String email = (String) githubUser.get("email");
+                                        if (email == null) {
+                                                // Fetch emails via API if not public
+                                                logToFile("DEBUG: Email not public, fetching from /user/emails");
+                                                ResponseEntity<List> emailsResponse = restTemplate.exchange(
+                                                                "https://api.github.com/user/emails",
+                                                                HttpMethod.GET,
+                                                                new HttpEntity<>(userHeaders),
+                                                                List.class);
+                                                List<Map<String, Object>> emails = emailsResponse.getBody();
+                                                if (emails != null) {
+                                                        for (Map<String, Object> emailObj : emails) {
+                                                                if (Boolean.TRUE.equals(emailObj.get("primary"))) {
+                                                                        email = (String) emailObj.get("email");
+                                                                        break;
+                                                                }
+                                                        }
+                                                }
+                                        }
 
+                                        if (email == null) {
+                                                throw new RuntimeException("Could not retrieve email from GitHub");
+                                        }
+
+                                        user = userRepository.findByEmail(email).orElse(null);
+                                        if (user == null) {
+                                                // Signup new user
+                                                user = new User();
+                                                user.setEmail(email);
+                                                user.setName(githubLogin);
+                                                user.setEmailVerified(true);
+                                                user = userRepository.save(user);
+                                                logToFile("DEBUG: Created new user for GitHub signup: " + email);
+                                        }
+                                }
+                        }
+
+                        // 4️⃣ Update GithubAuth
+                        GithubAuth auth = githubAuthRepository.findByUser(user).orElse(new GithubAuth());
                         auth.setUser(user);
-                        auth.setGithubUserId(((Number) githubUser.get("id")).longValue());
-                        auth.setGithubUsername((String) githubUser.get("login"));
-                        auth.setGithubEmail((String) githubUser.get("email"));
+                        auth.setGithubUserId(githubId);
+                        auth.setGithubUsername(githubLogin);
                         auth.setAvatarUrl((String) githubUser.get("avatar_url"));
                         auth.setAccessToken(accessToken);
                         auth.setUpdatedAt(LocalDateTime.now());
-
                         githubAuthRepository.save(auth);
-                        logToFile("DEBUG: Saved/Updated GitHub auth for user: " + user.getEmail());
 
-                        // ✅ Redirect back to frontend dashboard
+                        // 5️⃣ Generate Token for session
+                        String finalToken = jwtUtil.generateToken(user.getEmail());
+
+                        // 6️⃣ Redirect back with token and user info
+                        String targetUrl = "http://localhost:3000/callback" +
+                                        "?token=" + finalToken +
+                                        "&email=" + URLEncoder.encode(user.getEmail(), StandardCharsets.UTF_8) +
+                                        "&name=" + URLEncoder.encode(user.getName(), StandardCharsets.UTF_8);
+
+                        logToFile("DEBUG: Redirecting to frontend: " + targetUrl);
                         return ResponseEntity.status(HttpStatus.FOUND)
-                                        .location(URI.create(
-                                                        "http://localhost:3000/dashboard?status=success&message=GitHub+Connected"))
+                                        .location(URI.create(targetUrl))
                                         .build();
 
                 } catch (Exception e) {
-                        String errMsg = e.getMessage();
-                        if (errMsg == null)
-                                errMsg = e.getClass().getSimpleName();
-
-                        logToFile("ERROR: GitHub OAuth callback failed: " + errMsg);
-                        e.printStackTrace();
-
+                        logToFile("ERROR: GitHub OAuth callback failed: " + e.getMessage());
+                        // e.printStackTrace(); // Optional: Print stack trace to console
                         return ResponseEntity.status(HttpStatus.FOUND)
-                                        .location(URI.create("http://localhost:3000/dashboard?status=error&message=" +
-                                                        URLEncoder.encode(errMsg, StandardCharsets.UTF_8)))
+                                        .location(URI.create("http://localhost:3000/login?status=error&message=" +
+                                                        URLEncoder.encode(
+                                                                        e.getMessage() != null ? e.getMessage()
+                                                                                        : "Unknown Error",
+                                                                        StandardCharsets.UTF_8)))
                                         .build();
                 }
         }
