@@ -36,6 +36,27 @@ export default function RepoDetailPage() {
         }
     }, [id]);
 
+    const handleExportCSV = async () => {
+        try {
+            const response = await api.get(`/export/csv/${id}`, {
+                responseType: 'blob'
+            });
+
+            // Create a blob URL and trigger download
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `prioritized_issues_${id}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode?.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Failed to export CSV', err);
+            setError('Failed to download CSV. Please try again.');
+        }
+    };
+
     return (
         <div className="container mx-auto px-6 py-12 max-w-6xl">
             <Link
@@ -72,7 +93,10 @@ export default function RepoDetailPage() {
                         <RefreshCcw className={cn("w-4 h-4", loading && "animate-spin")} />
                         Refresh
                     </button>
-                    <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-600/20">
+                    <button
+                        onClick={handleExportCSV}
+                        className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-indigo-600/20"
+                    >
                         <Download className="w-4 h-4" />
                         Export CSV
                     </button>

@@ -90,16 +90,21 @@ public class PublicRepoServiceImpl implements PublicRepoService {
                     : 0;
 
             // ===============================
-            // 4️⃣ Save repository
+            // 4️⃣ Save or get repository
             // ===============================
-            Repository repository = new Repository();
-            repository.setUser(null); // PUBLIC repo
-            repository.setRepoOwner(owner);
-            repository.setRepoName(repoName);
-            repository.setRepoUrl(request.getRepoUrl());
-            repository.setRepoType("PUBLIC");
-            repository.setAnalyzedAt(LocalDateTime.now());
+            Repository repository = repositoryRepository
+                    .findByRepoOwnerAndRepoNameAndRepoType(owner, repoName, "PUBLIC")
+                    .orElseGet(() -> {
+                        Repository newRepo = new Repository();
+                        newRepo.setUser(null); // PUBLIC repo
+                        newRepo.setRepoOwner(owner);
+                        newRepo.setRepoName(repoName);
+                        newRepo.setRepoUrl(request.getRepoUrl());
+                        newRepo.setRepoType("PUBLIC");
+                        return newRepo;
+                    });
 
+            repository.setAnalyzedAt(LocalDateTime.now());
             repository = repositoryRepository.save(repository);
 
             // ===============================

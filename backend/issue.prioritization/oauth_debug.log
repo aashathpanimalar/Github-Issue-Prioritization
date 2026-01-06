@@ -36,3 +36,12 @@
 2026-01-05T20:22:13.039568400 - DEBUG: User info received for: pradeepdevs140
 2026-01-05T20:22:13.664967700 - DEBUG: Email not public, fetching from /user/emails
 2026-01-05T20:22:14.322601800 - DEBUG: Redirecting to frontend: http://localhost:3000/callback?token=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJwcmFkZWVwa3Jpc2huYTE0MEBnbWFpbC5jb20iLCJpYXQiOjE3Njc2MjQ3MzQsImV4cCI6MTc2NzcxMTEzNH0.kS4-2VsRozTQAMULhKJGC7r4s0sR14DmiibyUa5BHIqQi73jqFdnhGEsx0kT5yVC&email=pradeepkrishna140%40gmail.com&name=pradeep
+2026-01-06T20:14:14.432237 - DEBUG: Redirecting to GitHub: https://github.com/login/oauth/authorize?client_id=Ov23liccnKhFzwKD4Eim&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fapi%2Fgithub%2Foauth%2Fcallback&scope=repo,user,user:email&state=login
+2026-01-06T20:14:29.213739 - DEBUG: GitHub OAuth callback received. State: login
+2026-01-06T20:14:29.219261200 - DEBUG: Requesting access token from: https://github.com/login/oauth/access_token
+2026-01-06T20:14:30.442105 - DEBUG: Access token received successfully.
+2026-01-06T20:14:30.444140900 - DEBUG: Fetching user info from https://api.github.com/user
+2026-01-06T20:14:31.450527400 - DEBUG: User info received for: pradeepdevs140
+2026-01-06T20:14:31.617274200 - DEBUG: Email not public, fetching from /user/emails
+2026-01-06T20:14:32.162599600 - DEBUG: Created new user for GitHub signup: pradeepkrishna140@gmail.com
+2026-01-06T20:14:32.244307 - DEBUG: Redirecting to frontend: http://localhost:3000/callback?token=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJwcmFkZWVwa3Jpc2huYTE0MEBnbWFpbC5jb20iLCJpYXQiOjE3Njc3MTA2NzIsImV4cCI6MTc2Nzc5NzA3Mn0.j4QoaM9ul3yVNuNpJMBmrJNtkR0RRHyh1cEmcWLKXnuXmbqIFG8kRQ2ywSdZpvbZ&email=pradeepkrishna140%40gmail.com&name=pradeepdevs140

@@ -19,3 +19,6 @@ backend/.settings/
 # Ignore Spring Boot application properties (DISABLED FOR NOW)
 # backend/issue.prioritization/src/main/resources/application.properties
 application.properties
+
+# Ignore private_repo_debug.log
+# private_repo_debug.log
