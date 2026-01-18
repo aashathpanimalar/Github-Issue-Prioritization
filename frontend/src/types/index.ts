@@ -42,6 +42,8 @@ export interface IssueAnalysisResponse {
     score: number;
     priority: 'LOW' | 'MEDIUM' | 'HIGH';
     summary: string;
+    riskScore: number;
+    riskLevel: string;
 }
 
 export interface GithubUser {

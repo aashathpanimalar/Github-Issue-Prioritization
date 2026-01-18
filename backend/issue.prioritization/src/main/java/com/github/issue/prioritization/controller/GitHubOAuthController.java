@@ -19,7 +19,6 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -124,6 +123,7 @@ public class GitHubOAuthController {
                                         "code", code), tokenHeaders);
 
                         logToFile("DEBUG: Requesting access token from: " + tokenUrl);
+                        @SuppressWarnings("unchecked")
                         Map<String, Object> tokenResponse = restTemplate.postForObject(tokenUrl, tokenRequest,
                                         Map.class);
 
@@ -147,7 +147,8 @@ public class GitHubOAuthController {
                                         new HttpEntity<>(userHeaders),
                                         Map.class);
 
-                        Map githubUser = userResponse.getBody();
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> githubUser = userResponse.getBody();
                         Long githubId = ((Number) githubUser.get("id")).longValue();
                         String githubLogin = (String) githubUser.get("login");
                         logToFile("DEBUG: User info received for: " + githubLogin);
@@ -175,6 +176,7 @@ public class GitHubOAuthController {
                                                                 HttpMethod.GET,
                                                                 new HttpEntity<>(userHeaders),
                                                                 List.class);
+                                                @SuppressWarnings("unchecked")
                                                 List<Map<String, Object>> emails = emailsResponse.getBody();
                                                 if (emails != null) {
                                                         for (Map<String, Object> emailObj : emails) {

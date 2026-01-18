@@ -8,69 +8,71 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleNotFound(
-            ResourceNotFoundException ex) {
+        @ExceptionHandler(ResourceNotFoundException.class)
+        public ResponseEntity<ErrorResponse> handleNotFound(
+                        ResourceNotFoundException ex) {
 
-        return new ResponseEntity<>(
-                new ErrorResponse(
-                        HttpStatus.NOT_FOUND.value(),
-                        ex.getMessage()
-                ),
-                HttpStatus.NOT_FOUND
-        );
-    }
+                return new ResponseEntity<>(
+                                new ErrorResponse(
+                                                HttpStatus.NOT_FOUND.value(),
+                                                ex.getMessage()),
+                                HttpStatus.NOT_FOUND);
+        }
 
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ErrorResponse> handleUnauthorized(
-            UnauthorizedException ex) {
+        @ExceptionHandler(UnauthorizedException.class)
+        public ResponseEntity<ErrorResponse> handleUnauthorized(
+                        UnauthorizedException ex) {
 
-        return new ResponseEntity<>(
-                new ErrorResponse(
-                        HttpStatus.UNAUTHORIZED.value(),
-                        ex.getMessage()
-                ),
-                HttpStatus.UNAUTHORIZED
-        );
-    }
+                return new ResponseEntity<>(
+                                new ErrorResponse(
+                                                HttpStatus.UNAUTHORIZED.value(),
+                                                ex.getMessage()),
+                                HttpStatus.UNAUTHORIZED);
+        }
 
-    @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ErrorResponse> handleConflict(
-            ConflictException ex) {
+        @ExceptionHandler(ConflictException.class)
+        public ResponseEntity<ErrorResponse> handleConflict(
+                        ConflictException ex) {
 
-        return new ResponseEntity<>(
-                new ErrorResponse(
-                        HttpStatus.CONFLICT.value(),
-                        ex.getMessage()
-                ),
-                HttpStatus.CONFLICT
-        );
-    }
+                return new ResponseEntity<>(
+                                new ErrorResponse(
+                                                HttpStatus.CONFLICT.value(),
+                                                ex.getMessage()),
+                                HttpStatus.CONFLICT);
+        }
 
-    @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ErrorResponse> handleBadRequest(
-            BadRequestException ex) {
+        @ExceptionHandler(BadRequestException.class)
+        public ResponseEntity<ErrorResponse> handleBadRequest(
+                        BadRequestException ex) {
 
-        return new ResponseEntity<>(
-                new ErrorResponse(
-                        HttpStatus.BAD_REQUEST.value(),
-                        ex.getMessage()
-                ),
-                HttpStatus.BAD_REQUEST
-        );
-    }
+                return new ResponseEntity<>(
+                                new ErrorResponse(
+                                                HttpStatus.BAD_REQUEST.value(),
+                                                ex.getMessage()),
+                                HttpStatus.BAD_REQUEST);
+        }
 
-    // 🔥 Fallback for unexpected errors
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGeneric(
-            Exception ex) {
+        @ExceptionHandler(InvalidOrPrivateRepoException.class)
+        public ResponseEntity<ErrorResponse> handleInvalidOrPrivate(
+                        InvalidOrPrivateRepoException ex) {
 
-        return new ResponseEntity<>(
-                new ErrorResponse(
-                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                        "Something went wrong. Please try again."
-                ),
-                HttpStatus.INTERNAL_SERVER_ERROR
-        );
-    }
+                return new ResponseEntity<>(
+                                new ErrorResponse(
+                                                HttpStatus.FORBIDDEN.value(),
+                                                ex.getMessage()),
+                                HttpStatus.FORBIDDEN);
+        }
+
+        // 🔥 Fallback for unexpected errors
+        @ExceptionHandler(Exception.class)
+        public ResponseEntity<ErrorResponse> handleGeneric(
+                        Exception ex) {
+
+                return new ResponseEntity<>(
+                                new ErrorResponse(
+                                                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                                                ex.getMessage() != null ? ex.getMessage()
+                                                                : "Something went wrong. Please try again."),
+                                HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 }

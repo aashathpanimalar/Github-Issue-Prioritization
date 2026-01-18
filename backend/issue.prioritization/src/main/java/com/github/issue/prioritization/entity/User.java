@@ -19,6 +19,7 @@ public class User {
     private Integer userId;
 
     private String name;
+    private String role;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -54,6 +55,14 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public String getEmail() {

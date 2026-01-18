@@ -71,6 +71,20 @@ public class IssueAnalysisServiceImpl implements IssueAnalysisService {
 
                         analysisRepository.save(analysis);
 
+                        // ============================
+                        // 🚀 RISK SCORE CALCULATION
+                        // ============================
+                        double priorityWeight = "HIGH".equals(result.getPriority()) ? 7.0
+                                        : "MEDIUM".equals(result.getPriority()) ? 4.0 : 1.0;
+
+                        long daysOld = java.time.temporal.ChronoUnit.DAYS.between(issue.getCreatedDate(),
+                                        LocalDateTime.now());
+                        double ageWeight = Math.min(3.0, (daysOld / 30.0) * 0.5); // Max 3 points for age (6 months+)
+
+                        double riskScore = Math.min(10.0, priorityWeight + ageWeight + (rawConfidence * 2));
+                        String riskLevel = riskScore >= 7.5 ? "CRITICAL"
+                                        : riskScore >= 5.0 ? "HIGH" : riskScore >= 2.5 ? "MODERATE" : "LOW";
+
                         responses.add(
                                         new IssueAnalysisResponse(
                                                         issue.getIssueId(),
@@ -80,7 +94,10 @@ public class IssueAnalysisServiceImpl implements IssueAnalysisService {
                                                         "ML Analysis: This " + result.getPriority().toLowerCase() +
                                                                         " priority issue was detected with "
                                                                         + (int) (rawConfidence * 100) +
-                                                                        "% confidence based on its description and patterns."));
+                                                                        "% confidence based on its description and patterns.",
+                                                        BigDecimal.valueOf(riskScore).setScale(1, RoundingMode.HALF_UP)
+                                                                        .doubleValue(),
+                                                        riskLevel));
                 }
 
                 return responses;

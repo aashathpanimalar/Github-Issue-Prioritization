@@ -77,6 +77,14 @@ function DashboardContent() {
         if (e) e.preventDefault();
         const urlToAnalyze = customUrl || repoUrl;
 
+        // 🧠 Smart Detecion: Check if this is one of the user's private repos
+        const matchedRepo = githubRepos.find(r => r.html_url.toLowerCase() === urlToAnalyze.toLowerCase().replace(/\/$/, ''));
+        if (matchedRepo?.private) {
+            console.log('Smart Routing: Redirecting private repo to secure endpoint');
+            handleAnalyzePrivateRepo(urlToAnalyze);
+            return;
+        }
+
         setLoading(true);
         setError(null);
         setSuccess(null);
@@ -90,6 +98,24 @@ function DashboardContent() {
             }, 2000);
         } catch (err: any) {
             setError(err.response?.data?.message || 'Failed to analyze repository.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAnalyzePrivateRepo = async (repoUrl: string) => {
+        setLoading(true);
+        setError(null);
+        setSuccess(null);
+
+        try {
+            const response = await api.post<any>('/private-repo/analyze', { repoUrl });
+            setSuccess(`Analysis complete for ${response.data.repoName}!`);
+            setTimeout(() => {
+                router.push(`/repo/${response.data.repoId}`);
+            }, 2000);
+        } catch (err: any) {
+            setError(err.response?.data?.message || 'Failed to analyze private repository.');
         } finally {
             setLoading(false);
         }
@@ -348,10 +374,10 @@ function DashboardContent() {
 
                                                 <div className="flex items-center gap-2 pt-4 border-t border-white/5">
                                                     <button
-                                                        onClick={() => handleAnalyzePublicRepo(undefined, repo.html_url)}
+                                                        onClick={() => repo.private ? handleAnalyzePrivateRepo(repo.html_url) : handleAnalyzePublicRepo(undefined, repo.html_url)}
                                                         className="flex-1 bg-white/[0.03] hover:bg-white/10 text-white py-3 rounded-xl text-xs font-black transition-all border border-white/10 group-hover:border-indigo-500/50"
                                                     >
-                                                        Run Analysis
+                                                        {repo.private ? 'Analyze Secure' : 'Run Analysis'}
                                                     </button>
                                                     <a
                                                         href={repo.html_url}

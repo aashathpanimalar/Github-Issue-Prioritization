@@ -30,6 +30,7 @@ export default function IssueTable({ issues }: IssueTableProps) {
                         <tr className="border-b border-white/10 bg-white/5">
                             <th className="px-6 py-4 text-sm font-semibold text-gray-400">PRIORITY</th>
                             <th className="px-6 py-4 text-sm font-semibold text-gray-400">ISSUE TITLE</th>
+                            <th className="px-6 py-4 text-sm font-semibold text-gray-400">RISK</th>
                             <th className="px-6 py-4 text-sm font-semibold text-gray-400">SCORE</th>
                             <th className="px-6 py-4 text-sm font-semibold text-gray-400"></th>
                         </tr>
@@ -65,6 +66,17 @@ export default function IssueTable({ issues }: IssueTableProps) {
                                             Updated recently
                                         </span>
                                     </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <span className={cn(
+                                        "text-[10px] font-black px-2 py-0.5 rounded border",
+                                        issue.riskLevel === 'CRITICAL' ? 'text-rose-500 bg-rose-500/10 border-rose-500/20' :
+                                            issue.riskLevel === 'HIGH' ? 'text-orange-500 bg-orange-500/10 border-orange-500/20' :
+                                                issue.riskLevel === 'MODERATE' ? 'text-amber-500 bg-amber-500/10 border-amber-500/20' :
+                                                    'text-blue-500 bg-blue-500/10 border-blue-500/20'
+                                    )}>
+                                        {issue.riskLevel}
+                                    </span>
                                 </td>
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-2">
@@ -122,11 +134,14 @@ export default function IssueTable({ issues }: IssueTableProps) {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
                                             <span className="text-xs text-gray-500 block mb-1">Impact Score</span>
-                                            <span className="text-xl font-bold text-indigo-400">{issue.score}/10</span>
+                                            <span className="text-xl font-bold text-indigo-400">{issue.score.toFixed(1)}/10</span>
                                         </div>
                                         <div className="bg-white/5 p-4 rounded-2xl border border-white/10">
-                                            <span className="text-xs text-gray-500 block mb-1">Sentiment</span>
-                                            <span className="text-xl font-bold text-emerald-400">Positive</span>
+                                            <span className="text-xs text-gray-500 block mb-1">Risk Score</span>
+                                            <span className={cn(
+                                                "text-xl font-bold",
+                                                issue.riskScore > 7.5 ? "text-rose-500" : "text-amber-400"
+                                            )}>{issue.riskScore.toFixed(1)}/10</span>
                                         </div>
                                     </div>
                                 </div>
