@@ -43,6 +43,7 @@ public class SecurityConfig {
                                                                 "/api/github/oauth/start",
                                                                 "/api/github/oauth/callback",
                                                                 "/api/public-repo/**",
+                                                                "/api/chatbot/**",
                                                                 "/error")
                                                 .permitAll()
 

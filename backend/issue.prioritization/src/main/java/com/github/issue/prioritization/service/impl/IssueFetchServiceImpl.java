@@ -84,6 +84,29 @@ public class IssueFetchServiceImpl implements IssueFetchService {
                 headers.set("User-Agent", "Issue-Prioritization-App");
 
                 fetchIssues(apiUrl, headers, repo);
+                fetchIssues(apiUrl, headers, repo);
+        }
+
+        // ============================
+        // 🔥 NEW METHOD (PUBLIC WITH TOKEN)
+        // ============================
+        @Override
+        public void fetchAndStoreIssuesWithToken(Integer repoId, String accessToken) {
+                Repository repo = repositoryRepository.findById(repoId)
+                                .orElseThrow(() -> new RuntimeException("Repository not found"));
+
+                String apiUrl = "https://api.github.com/repos/"
+                                + repo.getRepoOwner()
+                                + "/" + repo.getRepoName()
+                                + "/issues";
+
+                HttpHeaders headers = new HttpHeaders();
+                if (accessToken != null && !accessToken.isEmpty()) {
+                        headers.setBearerAuth(accessToken);
+                }
+                headers.set("User-Agent", "Issue-Prioritization-App");
+
+                fetchIssues(apiUrl, headers, repo);
         }
 
         // ============================
