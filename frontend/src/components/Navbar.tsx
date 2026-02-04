@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Github, Menu, X, LogOut, User as UserIcon, LayoutDashboard, ChevronRight } from 'lucide-react';
+import { Github, Menu, X, LogOut, User as UserIcon, LayoutDashboard, ChevronRight, Lightbulb } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 
@@ -56,6 +56,10 @@ export default function Navbar() {
                                 <UserIcon className="w-4 h-4" />
                                 Profile
                             </Link>
+                            <Link href="/ideas" className="flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors">
+                                <Lightbulb className="w-4 h-4 text-amber-400" />
+                                Ideas
+                            </Link>
                             <button
                                 onClick={handleLogout}
                                 className="flex items-center gap-2 text-sm font-medium text-red-400 hover:text-red-300 transition-colors ml-4"
@@ -101,6 +105,9 @@ export default function Navbar() {
                                     </Link>
                                     <Link href="/profile" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-lg font-medium text-gray-300">
                                         <UserIcon /> Profile
+                                    </Link>
+                                    <Link href="/ideas" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 text-lg font-medium text-gray-300">
+                                        <Lightbulb className="text-amber-400" /> Ideas
                                     </Link>
                                     <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} className="flex items-center gap-3 text-lg font-medium text-red-500">
                                         <LogOut /> Logout

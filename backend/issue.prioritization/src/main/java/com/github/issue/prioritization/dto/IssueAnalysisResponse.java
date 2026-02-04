@@ -7,6 +7,8 @@ public class IssueAnalysisResponse {
     private String priority;
     private Double score;
     private String summary;
+    private Double riskScore;
+    private String riskLevel;
 
     public IssueAnalysisResponse() {
     }
@@ -16,13 +18,17 @@ public class IssueAnalysisResponse {
             String title,
             String priority,
             Double score,
-            String summary) {
+            String summary,
+            Double riskScore,
+            String riskLevel) {
 
         this.issueId = issueId;
         this.title = title;
         this.priority = priority;
         this.score = score;
         this.summary = summary;
+        this.riskScore = riskScore;
+        this.riskLevel = riskLevel;
     }
 
     public Integer getIssueId() {
@@ -63,5 +69,21 @@ public class IssueAnalysisResponse {
 
     public void setSummary(String summary) {
         this.summary = summary;
+    }
+
+    public Double getRiskScore() {
+        return riskScore;
+    }
+
+    public void setRiskScore(Double riskScore) {
+        this.riskScore = riskScore;
+    }
+
+    public String getRiskLevel() {
+        return riskLevel;
+    }
+
+    public void setRiskLevel(String riskLevel) {
+        this.riskLevel = riskLevel;
     }
 }

@@ -2,6 +2,7 @@
 package com.github.issue.prioritization.service.impl;
 
 import com.github.issue.prioritization.dto.PrivateRepoRequest;
+import com.github.issue.prioritization.dto.PrivateRepoResponse;
 import com.github.issue.prioritization.entity.*;
 import com.github.issue.prioritization.exception.InvalidOrPrivateRepoException;
 import com.github.issue.prioritization.repository.*;
@@ -12,11 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.Map;
 
 @Service
-public class PrivateRepoServiceImpl {
+public class PrivateRepoServiceImpl implements PrivateRepoService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -43,7 +46,9 @@ public class PrivateRepoServiceImpl {
         this.loggedInUserUtil = loggedInUserUtil;
     }
 
-    public void analyzePrivateRepo(PrivateRepoRequest request) {
+    @Override
+    public PrivateRepoResponse analyzePrivateRepo(PrivateRepoRequest request) {
+        logToFile("DEBUG: Received analyzePrivateRepo request for URL: " + request.getRepoUrl());
 
         User user = loggedInUserUtil.getLoggedInUser();
 
@@ -67,46 +72,43 @@ public class PrivateRepoServiceImpl {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(githubAuth.getAccessToken());
+        headers.set("User-Agent", "Issue-Prioritization-App");
 
         try {
             ResponseEntity<Map> response = restTemplate.exchange(
                     apiUrl,
                     HttpMethod.GET,
                     new HttpEntity<>(headers),
-                    Map.class
-            );
+                    Map.class);
 
             Map<String, Object> repoData = response.getBody();
 
             Boolean isPrivate = (Boolean) repoData.get("private");
-            String repoOwner = ((Map<String, Object>) repoData.get("owner")).get("login").toString();
 
             // ❌ Public repo entered in private flow
             if (!isPrivate) {
                 throw new RuntimeException("This is a public repository. Use public repo option.");
             }
 
-            // ❌ Repo not owned by OAuth user
-            if (!repoOwner.equalsIgnoreCase(githubAuth.getGithubUsername())) {
-                throw new RuntimeException("You are not authorized to access this private repository");
-            }
+            // ✅ Save or get repository
+            Repository repository = repositoryRepository.findByRepoOwnerAndRepoNameAndUser(owner, repoName, user)
+                    .orElseGet(() -> {
+                        Repository newRepo = new Repository();
+                        newRepo.setUser(user);
+                        newRepo.setRepoOwner(owner);
+                        newRepo.setRepoName(repoName);
+                        newRepo.setRepoUrl(request.getRepoUrl());
+                        newRepo.setRepoType("PRIVATE");
+                        return newRepo;
+                    });
 
-            // ✅ Save repository
-            Repository repository = new Repository();
-            repository.setUser(user);
-            repository.setRepoOwner(owner);
-            repository.setRepoName(repoName);
-            repository.setRepoUrl(request.getRepoUrl());
-            repository.setRepoType("PRIVATE");
             repository.setAnalyzedAt(LocalDateTime.now());
-
             repository = repositoryRepository.save(repository);
 
             // ✅ Fetch issues
             issueFetchService.fetchAndStorePrivateIssues(
                     repository.getRepoId(),
-                    githubAuth.getAccessToken()
-            );
+                    githubAuth.getAccessToken());
 
             // ✅ Analyze priority
             issueAnalysisService.analyzeIssues(repository.getRepoId());
@@ -114,8 +116,29 @@ public class PrivateRepoServiceImpl {
             // ✅ Detect duplicates
             duplicateIssueService.detectDuplicates(repository.getRepoId());
 
-        } catch (HttpClientErrorException.NotFound e) {
-            throw new RuntimeException("Repository not found on GitHub");
+            logToFile("SUCCESS: Private repo analysis completed for " + owner + "/" + repoName);
+
+            return new PrivateRepoResponse(repository.getRepoId(), repoName, owner, true);
+
+        } catch (HttpClientErrorException e) {
+            logToFile("ERROR: GitHub API error: " + e.getStatusCode() + " - " + e.getResponseBodyAsString());
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND) {
+                throw new RuntimeException("Repository not found on GitHub");
+            }
+            throw new RuntimeException("GitHub API error: " + e.getMessage());
+        } catch (Exception e) {
+            logToFile("ERROR: Unexpected error during analysis: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Operation failed: " + e.getMessage());
+        }
+    }
+
+    private void logToFile(String message) {
+        try (FileWriter fw = new FileWriter("private_repo_debug.log", true);
+                PrintWriter pw = new PrintWriter(fw)) {
+            pw.println(LocalDateTime.now() + " - " + message);
+        } catch (Exception e) {
+            System.err.println("Failed to log to file: " + e.getMessage());
         }
     }
 }
