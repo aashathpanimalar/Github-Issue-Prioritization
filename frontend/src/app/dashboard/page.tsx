@@ -70,7 +70,7 @@ function DashboardContent() {
 
     const handleConnectGithub = () => {
         const token = localStorage.getItem('token');
-        window.location.href = `http://localhost:8080/api/github/oauth/start?token=${token}`;
+        window.location.href = `http://localhost:8081/api/github/oauth/start?token=${token}`;
     };
 
     const handleAnalyzePublicRepo = async (e?: React.FormEvent, customUrl?: string) => {
