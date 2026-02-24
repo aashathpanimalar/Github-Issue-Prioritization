@@ -43,6 +43,7 @@ public class SecurityConfig {
                                                                 "/api/github/oauth/start",
                                                                 "/api/github/oauth/callback",
                                                                 "/api/public-repo/**",
+                                                                "/api/chatbot/**",
                                                                 "/error")
                                                 .permitAll()
 
@@ -50,6 +51,7 @@ public class SecurityConfig {
                                                                 "/api/github/oauth/user",
                                                                 "/api/github/oauth/repositories",
                                                                 "/api/issues/**",
+                                                                "/api/export/**",
                                                                 "/api/duplicates/**")
                                                 .authenticated()
 

@@ -6,6 +6,7 @@ import com.github.issue.prioritization.repository.*;
 import com.github.issue.prioritization.service.IssueFetchService;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -15,22 +16,29 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Transactional
 public class IssueFetchServiceImpl implements IssueFetchService {
 
         private final RepositoryRepository repositoryRepository;
         private final GithubIssueRepository githubIssueRepository;
         private final GithubAuthRepository githubAuthRepository;
+        private final IssueAnalysisRepository issueAnalysisRepository;
+        private final DuplicateIssueRepository duplicateIssueRepository;
 
         private final RestTemplate restTemplate = new RestTemplate();
 
         public IssueFetchServiceImpl(
                         RepositoryRepository repositoryRepository,
                         GithubIssueRepository githubIssueRepository,
-                        GithubAuthRepository githubAuthRepository) {
+                        GithubAuthRepository githubAuthRepository,
+                        IssueAnalysisRepository issueAnalysisRepository,
+                        DuplicateIssueRepository duplicateIssueRepository) {
 
                 this.repositoryRepository = repositoryRepository;
                 this.githubIssueRepository = githubIssueRepository;
                 this.githubAuthRepository = githubAuthRepository;
+                this.issueAnalysisRepository = issueAnalysisRepository;
+                this.duplicateIssueRepository = duplicateIssueRepository;
         }
 
         // ============================
@@ -84,6 +92,29 @@ public class IssueFetchServiceImpl implements IssueFetchService {
                 headers.set("User-Agent", "Issue-Prioritization-App");
 
                 fetchIssues(apiUrl, headers, repo);
+                fetchIssues(apiUrl, headers, repo);
+        }
+
+        // ============================
+        // 🔥 NEW METHOD (PUBLIC WITH TOKEN)
+        // ============================
+        @Override
+        public void fetchAndStoreIssuesWithToken(Integer repoId, String accessToken) {
+                Repository repo = repositoryRepository.findById(repoId)
+                                .orElseThrow(() -> new RuntimeException("Repository not found"));
+
+                String apiUrl = "https://api.github.com/repos/"
+                                + repo.getRepoOwner()
+                                + "/" + repo.getRepoName()
+                                + "/issues";
+
+                HttpHeaders headers = new HttpHeaders();
+                if (accessToken != null && !accessToken.isEmpty()) {
+                        headers.setBearerAuth(accessToken);
+                }
+                headers.set("User-Agent", "Issue-Prioritization-App");
+
+                fetchIssues(apiUrl, headers, repo);
         }
 
         // ============================
@@ -93,6 +124,12 @@ public class IssueFetchServiceImpl implements IssueFetchService {
                         String apiUrl,
                         HttpHeaders headers,
                         Repository repo) {
+
+                // 🧹 Clear existing issues, analysis, and duplicates for this repository
+                // to prevent merging reports and ensure a clean scan.
+                duplicateIssueRepository.deleteByRepository(repo);
+                issueAnalysisRepository.deleteByRepository(repo);
+                githubIssueRepository.deleteByRepository(repo);
 
                 HttpEntity<Void> entity = new HttpEntity<>(headers);
 

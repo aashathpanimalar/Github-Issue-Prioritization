@@ -53,17 +53,25 @@ export default function Chatbot() {
                 issueContext: null,
             });
 
-            const assistantMessage: Message = {
-                role: "assistant",
-                content: response.data.response || "I'm sorry, I couldn't process that request.",
-                timestamp: new Date(),
-            };
-
-            setMessages((prev) => [...prev, assistantMessage]);
-        } catch (error) {
+            if (response.data.success) {
+                const assistantMessage: Message = {
+                    role: "assistant",
+                    content: response.data.response || "I'm sorry, I couldn't process that request.",
+                    timestamp: new Date(),
+                };
+                setMessages((prev) => [...prev, assistantMessage]);
+            } else {
+                const errorMessage: Message = {
+                    role: "assistant",
+                    content: response.data.error || "I'm having trouble connecting to the AI brain. Is the agent running?",
+                    timestamp: new Date(),
+                };
+                setMessages((prev) => [...prev, errorMessage]);
+            }
+        } catch (error: any) {
             const errorMessage: Message = {
                 role: "assistant",
-                content: "Sorry, I'm having trouble connecting to the server. Please try again later.",
+                content: "System Error: Unable to reach the prioritization server. Please check your connection.",
                 timestamp: new Date(),
             };
             setMessages((prev) => [...prev, errorMessage]);

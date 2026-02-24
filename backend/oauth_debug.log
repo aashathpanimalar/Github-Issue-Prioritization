@@ -1,0 +1,15 @@
+2026-01-06T14:17:12.639408500 - DEBUG: Redirecting to GitHub: https://github.com/login/oauth/authorize?client_id=Ov23lixIts09GIHuWwwZ&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fapi%2Fgithub%2Foauth%2Fcallback&scope=repo,user,user:email&state=login
+2026-01-06T14:17:41.686430900 - DEBUG: GitHub OAuth callback received. State: login
+2026-01-06T14:17:41.687604600 - DEBUG: Requesting access token from: https://github.com/login/oauth/access_token
+2026-01-06T14:17:42.669747200 - DEBUG: Access token received successfully.
+2026-01-06T14:17:42.673243800 - DEBUG: Fetching user info from https://api.github.com/user
+2026-01-06T14:17:43.766297800 - DEBUG: User info received for: aashathpanimalar
+2026-01-06T14:17:43.782382700 - DEBUG: Email not public, fetching from /user/emails
+2026-01-06T14:17:44.300129600 - DEBUG: Redirecting to frontend: http://localhost:3000/callback?token=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhYXNoYXRocGFuaW1hbGFyQGdtYWlsLmNvbSIsImlhdCI6MTc2NzY4OTI2NCwiZXhwIjoxNzY3Nzc1NjY0fQ.vWp9fQ5kiZtzIwnFloZTmE5Qen6DuvKI7PP43kWqS9I5UPqk6easfAqfQHLFFPbE&email=aashathpanimalar%40gmail.com&name=Aashath
+2026-01-06T14:19:14.796119400 - DEBUG: Redirecting to GitHub: https://github.com/login/oauth/authorize?client_id=Ov23lixIts09GIHuWwwZ&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fapi%2Fgithub%2Foauth%2Fcallback&scope=repo,user,user:email&state=login
+2026-01-06T14:19:15.298063800 - DEBUG: GitHub OAuth callback received. State: login
+2026-01-06T14:19:15.298063800 - DEBUG: Requesting access token from: https://github.com/login/oauth/access_token
+2026-01-06T14:19:16.001693700 - DEBUG: Access token received successfully.
+2026-01-06T14:19:16.004189300 - DEBUG: Fetching user info from https://api.github.com/user
+2026-01-06T14:19:16.501747300 - DEBUG: User info received for: aashathpanimalar
+2026-01-06T14:19:16.603906600 - DEBUG: Redirecting to frontend: http://localhost:3000/callback?token=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJhYXNoYXRocGFuaW1hbGFyQGdtYWlsLmNvbSIsImlhdCI6MTc2NzY4OTM1NiwiZXhwIjoxNzY3Nzc1NzU2fQ.9fjjUP5pW1xLVHVfcO8lemwg0RzxruJkvdpSk3H3XBmgKX6DCcH7u6A9YiFfQm3K&email=aashathpanimalar%40gmail.com&name=Aashath

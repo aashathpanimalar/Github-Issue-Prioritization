@@ -4,12 +4,14 @@ import com.github.issue.prioritization.entity.*;
 import com.github.issue.prioritization.repository.*;
 import com.github.issue.prioritization.service.DuplicateIssueService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@Transactional
 public class DuplicateIssueServiceImpl implements DuplicateIssueService {
 
     private final GithubIssueRepository issueRepository;
@@ -49,8 +51,7 @@ public class DuplicateIssueServiceImpl implements DuplicateIssueService {
                     duplicate.setOriginalIssue(issue1);
                     duplicate.setDuplicateIssue(issue2);
                     duplicate.setSimilarityScore(
-                            BigDecimal.valueOf(similarity).setScale(2, BigDecimal.ROUND_HALF_UP)
-                    );
+                            BigDecimal.valueOf(similarity).setScale(2, BigDecimal.ROUND_HALF_UP));
                     duplicate.setDetectedAt(LocalDateTime.now());
 
                     duplicateRepository.save(duplicate);
@@ -64,11 +65,9 @@ public class DuplicateIssueServiceImpl implements DuplicateIssueService {
     private double calculateImprovedSimilarity(GithubIssue a, GithubIssue b) {
 
         Map<String, Integer> vectorA = buildWeightedVector(
-                a.getTitle() + " " + a.getDescription()
-        );
+                a.getTitle() + " " + a.getDescription());
         Map<String, Integer> vectorB = buildWeightedVector(
-                b.getTitle() + " " + b.getDescription()
-        );
+                b.getTitle() + " " + b.getDescription());
 
         return cosineSimilarity(vectorA, vectorB);
     }
@@ -79,8 +78,7 @@ public class DuplicateIssueServiceImpl implements DuplicateIssueService {
 
         Set<String> stopWords = Set.of(
                 "a", "the", "is", "to", "when", "on", "in", "very",
-                "and", "of", "for", "with", "this", "that"
-        );
+                "and", "of", "for", "with", "this", "that");
 
         String normalized = text
                 .toLowerCase()
@@ -93,8 +91,10 @@ public class DuplicateIssueServiceImpl implements DuplicateIssueService {
 
         for (String word : tokens) {
 
-            if (word.length() <= 2) continue;
-            if (stopWords.contains(word)) continue;
+            if (word.length() <= 2)
+                continue;
+            if (stopWords.contains(word))
+                continue;
 
             // 🔹 Simple stemming
             word = word
@@ -132,7 +132,8 @@ public class DuplicateIssueServiceImpl implements DuplicateIssueService {
             magnitudeB += b * b;
         }
 
-        if (magnitudeA == 0 || magnitudeB == 0) return 0.0;
+        if (magnitudeA == 0 || magnitudeB == 0)
+            return 0.0;
 
         return dotProduct / (Math.sqrt(magnitudeA) * Math.sqrt(magnitudeB));
     }
