@@ -60,6 +60,10 @@ public class DuplicateIssueServiceImpl implements DuplicateIssueService {
         }
     }
 
+    @Override
+    public List<DuplicateIssue> getDuplicates(Integer repoId) {
+        return duplicateRepository.findByRepositoryId(repoId);
+    }
     // ================= IMPROVED SIMILARITY =================
 
     private double calculateImprovedSimilarity(GithubIssue a, GithubIssue b) {

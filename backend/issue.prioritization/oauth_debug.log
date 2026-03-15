@@ -120,3 +120,13 @@
 2026-02-24T20:43:02.073344900 - DEBUG: Email not public, fetching from /user/emails
 2026-02-24T20:43:02.627792700 - DEBUG: Created new user for GitHub signup: pradeepkrishna140@gmail.com
 2026-02-24T20:43:02.751064500 - DEBUG: Redirecting to frontend: http://localhost:3000/callback?token=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJwcmFkZWVwa3Jpc2huYTE0MEBnbWFpbC5jb20iLCJpYXQiOjE3NzE5NDU5ODIsImV4cCI6MTc3MjAzMjM4Mn0.BD-y8DuCFwhkGKcElxRPNyN_myQEaO8eWan9KkOH-60mnUgxWWnsHY_6Jn1hRC_j&email=pradeepkrishna140%40gmail.com&name=pradeepdevs140
+2026-03-15T18:40:04.561994800 - DEBUG: Redirecting to GitHub: https://github.com/login/oauth/authorize?client_id=Ov23lixIts09GIHuWwwZ&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fapi%2Fgithub%2Foauth%2Fcallback&scope=repo,user,user:email&state=login
+2026-03-15T18:40:09.638404300 - DEBUG: GitHub OAuth callback received. State: login
+2026-03-15T18:40:09.648087900 - DEBUG: Requesting access token from: https://github.com/login/oauth/access_token
+2026-03-15T18:40:11.329108700 - DEBUG: Access token received successfully.
+2026-03-15T18:40:11.331804400 - DEBUG: Fetching user info from https://api.github.com/user
+2026-03-15T18:40:11.831918 - DEBUG: User info received for: pradeepdevs140
+2026-03-15T18:40:12.507383800 - DEBUG: Redirecting to frontend: http://localhost:3000/callback?token=eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJwcmFkZWVwa3Jpc2huYTE0MEBnbWFpbC5jb20iLCJpYXQiOjE3NzM1ODAyMTIsImV4cCI6MTc3MzY2NjYxMn0.6-tmueRcj_OQaPAUS8_BDSrzdjBdBg9INtnZio9aDyrZlRRKQojOOASMwEkNFi7U&email=pradeepkrishna140%40gmail.com&name=pradeepdevs140
+2026-03-15T19:17:08.596627800 - DEBUG: Redirecting to GitHub: https://github.com/login/oauth/authorize?client_id=Ov23lixIts09GIHuWwwZ&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fapi%2Fgithub%2Foauth%2Fcallback&scope=repo,user,user:email&state=login
+2026-03-15T19:58:48.639020700 - DEBUG: Redirecting to GitHub: https://github.com/login/oauth/authorize?client_id=Ov23lixIts09GIHuWwwZ&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fapi%2Fgithub%2Foauth%2Fcallback&scope=repo,user,user:email&state=login
+2026-03-15T20:03:31.403648800 - DEBUG: Redirecting to GitHub: https://github.com/login/oauth/authorize?client_id=Ov23lixIts09GIHuWwwZ&redirect_uri=http%3A%2F%2Flocalhost%3A8081%2Fapi%2Fgithub%2Foauth%2Fcallback&scope=repo,user,user:email&state=login

@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 public interface DuplicateIssueRepository
                 extends JpaRepository<DuplicateIssue, Integer> {
 
@@ -15,4 +17,7 @@ public interface DuplicateIssueRepository
         @Transactional
         @Query("DELETE FROM DuplicateIssue di WHERE di.originalIssue.repository = :repo")
         void deleteByRepository(@Param("repo") Repository repo);
+
+        @Query("SELECT di FROM DuplicateIssue di WHERE di.originalIssue.repository.id = :repoId")
+        List<DuplicateIssue> findByRepositoryId(@Param("repoId") Integer repoId);
 }

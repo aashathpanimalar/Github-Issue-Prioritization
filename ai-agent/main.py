@@ -144,6 +144,43 @@ async def suggest_solution(request: ChatRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/analyze-project")
+async def analyze_project(data: dict):
+    project_name = data.get("projectName", "Unknown Project")
+    tasks = data.get("tasks", [])
+    
+    # Simple analysis logic
+    total_tasks = len(tasks)
+    pending = len([t for t in tasks if t["status"] == "PENDING"])
+    review = len([t for t in tasks if t["status"] == "IN_REVIEW"])
+    complete = len([t for t in tasks if t["status"] == "COMPLETE"])
+    
+    high_priority_pending = len([t for t in tasks if t["status"] == "PENDING" and t["priority"] in ["HIGH", "CRITICAL"]])
+    
+    # Generate a prompt for the AI to get better insights
+    # For now, return structured data and a synthesized summary
+    
+    insight = f"Project '{project_name}' has {total_tasks} total tasks. "
+    if high_priority_pending > 0:
+        insight += f"Warning: {high_priority_pending} high-priority tasks are still pending. "
+    
+    productivity = (complete / total_tasks * 100) if total_tasks > 0 else 0
+    
+    recommendation = "Focus on clearing high-priority pending tasks." if high_priority_pending > 0 else "Project pace is healthy."
+
+    return {
+        "summary": insight,
+        "metrics": {
+            "total": total_tasks,
+            "pending": pending,
+            "review": review,
+            "complete": complete,
+            "productivityScore": productivity
+        },
+        "recommendation": recommendation,
+        "bottlenecks": ["Task Review" if review > (total_tasks * 0.4) else "None identified"]
+    }
+
 if __name__ == "__main__":
     print(f"Starting GitHub Issue AI Agent on {config.HOST}:{config.PORT}")
     print(f"API Documentation: http://{config.HOST}:{config.PORT}/docs")
