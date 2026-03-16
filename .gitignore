@@ -12,13 +12,19 @@ backend/.settings/
 # IDE
 .idea/
 .vscode/
+.env
 
 # OS
 .DS_Store
 
-# Ignore Spring Boot application properties (DISABLED FOR NOW)
-# backend/issue.prioritization/src/main/resources/application.properties
-application.properties
+# Ignore Spring Boot application properties
+backend/issue.prioritization/src/main/resources/application.properties
+**/application.properties
 
-# Ignore private_repo_debug.log
-# private_repo_debug.log
+# AI Agent
+ai-agent/.env
+ai-agent/__pycache__/
+ai-agent/venv/
+
+# Logs
+*.log

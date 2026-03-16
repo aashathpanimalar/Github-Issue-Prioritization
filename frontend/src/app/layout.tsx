@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Chatbot from "@/components/Chatbot";
+import { ThemeProvider } from "@/lib/ThemeContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "IssuePrioritizer | AI-Powered GitHub Issue Analysis",
-  description: "Prioritize your GitHub issues using advanced machine learning and automation.",
+  title: "GitHub Hub | AI-Powered Repository Intelligence",
+  description: "Visualize branches, analyze PRs, track contributors and manage your full GitHub workflow in one beautiful platform.",
 };
 
 export default function RootLayout({
@@ -25,16 +26,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#020617] text-white min-h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-themed text-themed min-h-screen font-jakarta`}
         suppressHydrationWarning
       >
-        <Navbar />
-        <main className="pt-20">
-          {children}
-        </main>
-        <Chatbot />
+        <ThemeProvider>
+          <Navbar />
+          <main className="pt-20">
+            {children}
+          </main>
+          <Chatbot />
+        </ThemeProvider>
       </body>
     </html>
   );

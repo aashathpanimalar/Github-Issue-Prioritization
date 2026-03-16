@@ -10,6 +10,7 @@ import com.github.issue.prioritization.service.*;
 import com.github.issue.prioritization.util.LoggedInUserUtil;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 @Service
+@Transactional
 public class PrivateRepoServiceImpl implements PrivateRepoService {
 
     private final RestTemplate restTemplate = new RestTemplate();

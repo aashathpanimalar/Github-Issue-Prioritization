@@ -65,3 +65,43 @@ export interface GithubRepo {
         avatar_url: string;
     };
 }
+
+export interface Project {
+    id: number;
+    name: string;
+    description: string;
+    status: 'ACTIVE' | 'ARCHIVED';
+    githubRepoUrl?: string;
+    owner: User;
+    inviteToken: string;
+    createdAt: string;
+}
+
+export interface ProjectMember {
+    id: number;
+    user: User;
+    role: 'ADMIN' | 'MANAGER' | 'CONTRIBUTOR';
+    joinedAt: string;
+}
+
+export interface ProjectTask {
+    id: number;
+    title: string;
+    description: string;
+    status: 'PENDING' | 'IN_REVIEW' | 'COMPLETE';
+    priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+    branch?: string;
+    dueDate?: string;
+    assignedTo?: User;
+    createdBy: User;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface ProjectActivity {
+    id: number;
+    user: User;
+    action: 'CREATED' | 'ASSIGNED' | 'STATUS_CHANGED' | 'MEMBER_JOINED';
+    message: string;
+    createdAt: string;
+}

@@ -6,6 +6,7 @@ import com.github.issue.prioritization.repository.*;
 import com.github.issue.prioritization.service.IssueFetchService;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -15,22 +16,29 @@ import java.util.List;
 import java.util.Map;
 
 @Service
+@Transactional
 public class IssueFetchServiceImpl implements IssueFetchService {
 
         private final RepositoryRepository repositoryRepository;
         private final GithubIssueRepository githubIssueRepository;
         private final GithubAuthRepository githubAuthRepository;
+        private final IssueAnalysisRepository issueAnalysisRepository;
+        private final DuplicateIssueRepository duplicateIssueRepository;
 
         private final RestTemplate restTemplate = new RestTemplate();
 
         public IssueFetchServiceImpl(
                         RepositoryRepository repositoryRepository,
                         GithubIssueRepository githubIssueRepository,
-                        GithubAuthRepository githubAuthRepository) {
+                        GithubAuthRepository githubAuthRepository,
+                        IssueAnalysisRepository issueAnalysisRepository,
+                        DuplicateIssueRepository duplicateIssueRepository) {
 
                 this.repositoryRepository = repositoryRepository;
                 this.githubIssueRepository = githubIssueRepository;
                 this.githubAuthRepository = githubAuthRepository;
+                this.issueAnalysisRepository = issueAnalysisRepository;
+                this.duplicateIssueRepository = duplicateIssueRepository;
         }
 
         // ============================
@@ -116,6 +124,12 @@ public class IssueFetchServiceImpl implements IssueFetchService {
                         String apiUrl,
                         HttpHeaders headers,
                         Repository repo) {
+
+                // 🧹 Clear existing issues, analysis, and duplicates for this repository
+                // to prevent merging reports and ensure a clean scan.
+                duplicateIssueRepository.deleteByRepository(repo);
+                issueAnalysisRepository.deleteByRepository(repo);
+                githubIssueRepository.deleteByRepository(repo);
 
                 HttpEntity<Void> entity = new HttpEntity<>(headers);
 

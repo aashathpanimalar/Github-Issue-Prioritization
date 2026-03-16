@@ -51,6 +51,7 @@ public class SecurityConfig {
                                                                 "/api/github/oauth/user",
                                                                 "/api/github/oauth/repositories",
                                                                 "/api/issues/**",
+                                                                "/api/export/**",
                                                                 "/api/duplicates/**")
                                                 .authenticated()
 

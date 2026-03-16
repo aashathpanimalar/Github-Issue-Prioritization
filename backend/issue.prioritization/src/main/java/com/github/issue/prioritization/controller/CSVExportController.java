@@ -21,10 +21,15 @@ public class CSVExportController {
 
     @GetMapping("/csv/{repoId}")
     public void exportToCSV(@PathVariable Integer repoId, HttpServletResponse response) throws IOException {
+        com.github.issue.prioritization.entity.Repository repo = issueAnalysisService.getRepositoryById(repoId);
         List<IssueAnalysisResponse> issues = issueAnalysisService.analyzeIssues(repoId);
 
+        String filename = String.format("prioritized_issues_%s_%s.csv",
+                repo.getRepoOwner(),
+                repo.getRepoName());
+
         response.setContentType("text/csv");
-        response.setHeader("Content-Disposition", "attachment; file=prioritized_issues_" + repoId + ".csv");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
 
         PrintWriter writer = response.getWriter();
         writer.println("Issue ID,Title,Priority,Confidence Score,Risk Score,Risk Level,Summary");

@@ -17,12 +17,11 @@ public class IssueAnalysisController {
         this.issueAnalysisService = issueAnalysisService;
     }
 
-    @PostMapping("/analyze/{repoId}")
+    @GetMapping("/analyze/{repoId}")
     public ResponseEntity<List<IssueAnalysisResponse>> analyzeIssues(
             @PathVariable Integer repoId) {
 
-        List<IssueAnalysisResponse> response =
-                issueAnalysisService.analyzeIssues(repoId);
+        List<IssueAnalysisResponse> response = issueAnalysisService.analyzeIssues(repoId);
 
         return ResponseEntity.ok(response);
     }

@@ -11,6 +11,7 @@ import com.github.issue.prioritization.repository.IssueAnalysisRepository;
 import com.github.issue.prioritization.repository.RepositoryRepository;
 import com.github.issue.prioritization.service.IssueAnalysisService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 public class IssueAnalysisServiceImpl implements IssueAnalysisService {
 
         private final GithubIssueRepository issueRepository;
@@ -136,5 +138,11 @@ public class IssueAnalysisServiceImpl implements IssueAnalysisService {
                 }
 
                 return responses;
+        }
+
+        @Override
+        public Repository getRepositoryById(Integer repoId) {
+                return repositoryRepository.findById(repoId)
+                                .orElseThrow(() -> new RuntimeException("Repository not found"));
         }
 }
